@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Poker Tab Analyzer</title>
+  <style>
+    body {
+      width: 350px;
+      min-height: 400px;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #2c5f2d 0%, #97bc62 100%);
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 20px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .status {
+      padding: 20px;
+      background: #2a2a2a;
+      border-bottom: 1px solid #444;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+      background: #ff4444;
+    }
+    
+    .status-indicator.active {
+      background: #44ff44;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    .controls {
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      font-size: 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 5px;
+    }
+    
+    .btn:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    
+    .btn:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn.stop {
+      background: #f44336;
+    }
+    
+    .btn.stop:hover {
+      background: #da190b;
+    }
+    
+    .stats {
+      padding: 20px;
+      background: #2a2a2a;
+      font-size: 14px;
+    }
+    
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      padding: 8px;
+      background: #333;
+      border-radius: 4px;
+    }
+    
+    .last-detection {
+      padding: 20px;
+      background: #222;
+      border-top: 1px solid #444;
+    }
+    
+    .cards {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .card {
+      width: 40px;
+      height: 56px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #000;
+    }
+    
+    .card.red {
+      color: #ff0000;
+    }
+    
+    .settings {
+      padding: 20px;
+      border-top: 1px solid #444;
+    }
+    
+    .setting-row {
+      margin: 10px 0;
+    }
+    
+    .setting-row label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+      color: #aaa;
+    }
+    
+    .setting-row input[type="range"] {
+      width: 100%;
+    }
+    
+    .setting-value {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+    }
+    
+    .info {
+      padding: 15px;
+      background: #1e3a1e;
+      border-top: 1px solid #2c5f2d;
+      font-size: 12px;
+      text-align: center;
+      color: #97bc62;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>♠♥ Poker Tab Analyzer ♦♣</h1>
+  </div>
+  
+  <div class="status">
+    <span class="status-indicator" id="statusIndicator"></span>
+    <span id="statusText">Not running</span>
+  </div>
+  
+  <div class="controls">
+    <button class="btn" id="startBtn">Start Analysis</button>
+    <button class="btn stop" id="stopBtn" style="display: none;">Stop Analysis</button>
+  </div>
+  
+  <div class="stats" id="stats" style="display: none;">
+    <div class="stat-row">
+      <span>Hands Analyzed:</span>
+      <span id="handsCount">0</span>
+    </div>
+    <div class="stat-row">
+      <span>Current Site:</span>
+      <span id="currentSite">-</span>
+    </div>
+    <div class="stat-row">
+      <span>Detection Rate:</span>
+      <span id="detectionRate">-</span>
+    </div>
+  </div>
+  
+  <div class="last-detection" id="lastDetection" style="display: none;">
+    <h3>Last Detection</h3>
+    <div class="cards" id="detectedCards"></div>
+  </div>
+  
+  <div class="settings">
+    <div class="setting-row">
+      <label for="intervalSlider">Capture Interval</label>
+      <input type="range" id="intervalSlider" min="100" max="1000" value="250" step="50">
+      <div class="setting-value"><span id="intervalValue">250</span> ms</div>
+    </div>
+  </div>
+  
+  <div class="info">
+    Works with any poker site using computer vision
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

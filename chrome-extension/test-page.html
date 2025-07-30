@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Poker Analyzer Test Page</title>
+  <style>
+    body {
+      background: #2a7e3e;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    
+    .poker-table {
+      width: 800px;
+      height: 500px;
+      background: #35654d;
+      border-radius: 200px;
+      margin: 50px auto;
+      position: relative;
+      border: 10px solid #8B4513;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    }
+    
+    .card {
+      width: 60px;
+      height: 84px;
+      background: white;
+      border: 1px solid #000;
+      border-radius: 5px;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+    
+    .card.red {
+      color: red;
+    }
+    
+    .card.black {
+      color: black;
+    }
+    
+    /* Hole cards */
+    .hole-cards {
+      bottom: 50px;
+      left: 350px;
+    }
+    
+    .hole-cards .card:nth-child(2) {
+      left: 70px;
+    }
+    
+    /* Community cards */
+    .community-cards {
+      top: 200px;
+      left: 250px;
+    }
+    
+    .community-cards .card {
+      margin-right: 10px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .pot {
+      position: absolute;
+      top: 150px;
+      left: 350px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 18px;
+    }
+    
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+    
+    button:hover {
+      background: #45a049;
+    }
+    
+    .info {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 800px;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="info">
+    <h1>Poker Analyzer Test Page</h1>
+    <p>This page simulates a poker table for testing the Chrome extension.</p>
+    <p>Click the buttons below to show different card combinations.</p>
+  </div>
+  
+  <div class="poker-table" id="table">
+    <div class="pot" id="pot">Pot: $100</div>
+    
+    <div class="hole-cards">
+      <div class="card red" id="card1">A♥</div>
+      <div class="card black" id="card2">K♠</div>
+    </div>
+    
+    <div class="community-cards" id="community">
+      <!-- Community cards will be added here -->
+    </div>
+  </div>
+  
+  <div class="controls">
+    <button onclick="showHand('AA')">Pocket Aces</button>
+    <button onclick="showHand('KK')">Pocket Kings</button>
+    <button onclick="showHand('AK')">Ace King</button>
+    <button onclick="showHand('72')">Seven Deuce</button>
+    <button onclick="toggleFlop()">Show/Hide Flop</button>
+    <button onclick="randomPot()">Random Pot</button>
+  </div>
+  
+  <script>
+    const hands = {
+      'AA': [{rank: 'A', suit: '♠', color: 'black'}, {rank: 'A', suit: '♥', color: 'red'}],
+      'KK': [{rank: 'K', suit: '♣', color: 'black'}, {rank: 'K', suit: '♦', color: 'red'}],
+      'AK': [{rank: 'A', suit: '♦', color: 'red'}, {rank: 'K', suit: '♣', color: 'black'}],
+      '72': [{rank: '7', suit: '♥', color: 'red'}, {rank: '2', suit: '♣', color: 'black'}]
+    };
+    
+    function showHand(handCode) {
+      const hand = hands[handCode];
+      document.getElementById('card1').textContent = hand[0].rank + hand[0].suit;
+      document.getElementById('card1').className = 'card ' + hand[0].color;
+      document.getElementById('card2').textContent = hand[1].rank + hand[1].suit;
+      document.getElementById('card2').className = 'card ' + hand[1].color;
+    }
+    
+    let flopShown = false;
+    function toggleFlop() {
+      const community = document.getElementById('community');
+      
+      if (!flopShown) {
+        community.innerHTML = `
+          <div class="card red">Q♦</div>
+          <div class="card black">J♣</div>
+          <div class="card black">T♠</div>
+        `;
+      } else {
+        community.innerHTML = '';
+      }
+      
+      flopShown = !flopShown;
+    }
+    
+    function randomPot() {
+      const pot = Math.floor(Math.random() * 900) + 100;
+      document.getElementById('pot').textContent = `Pot: $${pot}`;
+    }
+    
+    // Log that test page is ready
+    console.log('Poker test page loaded. The Chrome extension should detect the cards shown.');
+  </script>
+</body>
+</html>

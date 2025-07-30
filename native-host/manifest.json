@@ -1,0 +1,9 @@
+{
+  "name": "com.pokeranalyzer.solver",
+  "description": "Native messaging host for poker solver",
+  "path": "/home/pselamy/repositories/poker-tab-analyzer/native-host/poker_host.py",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://YOUR_EXTENSION_ID_HERE/"
+  ]
+}
