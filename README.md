@@ -8,6 +8,14 @@ A real-time poker assistant that captures screenshots of your Chrome browser tab
 - **Card Recognition**: Uses computer vision to identify your hole cards and community cards
 - **Strategy Analysis**: Integrates with poker solver algorithms to recommend optimal plays
 - **Chip Stack Awareness**: Considers player count and chip stacks in its recommendations
+- **Platform Support**: Optimized for Global Poker with plans for additional platforms
+
+## Supported Platforms
+
+- **Global Poker** ✅ (Primary support)
+- PokerStars (Coming soon)
+- GGPoker (Coming soon)
+- Americas Cardroom (Planned)
 
 ## Requirements
 

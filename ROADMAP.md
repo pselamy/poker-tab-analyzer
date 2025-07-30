@@ -11,6 +11,7 @@
 - [ ] Create screenshot capture with configurable intervals
 - [ ] Add region-of-interest detection for poker table
 - [ ] Test performance at 250ms intervals
+- [ ] **Priority: Global Poker table detection**
 
 ## Phase 3: Card Detection
 - [ ] Implement template matching for card detection

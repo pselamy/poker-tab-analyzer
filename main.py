@@ -9,6 +9,9 @@ import json
 import argparse
 from datetime import datetime
 
+# Import platform factory when ready
+# from src.platforms.factory import PlatformFactory
+
 # Placeholder imports - to be implemented
 # from screenshot_capture import ChromeScreenshotCapture
 # from card_detector import PokerCardDetector
@@ -19,6 +22,13 @@ class PokerTabAnalyzer:
         """Initialize the Poker Tab Analyzer with configuration."""
         self.config = self.load_config(config_file)
         self.is_running = False
+        
+        # Get platform from config
+        self.platform_name = self.config.get('platform', 'global_poker')
+        print(f"Initializing for platform: {self.platform_name}")
+        
+        # Initialize platform detector (when implemented)
+        # self.platform_detector = PlatformFactory.create_detector(self.platform_name)
         
         # Initialize components (placeholder)
         # self.screenshot_capture = ChromeScreenshotCapture()

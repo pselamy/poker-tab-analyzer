@@ -1,4 +1,5 @@
 {
+    "platform": "global_poker",
     "screenshot_interval_ms": 250,
     "chrome_tab_name": null,
     "detection_confidence": 0.8,
@@ -15,5 +16,12 @@
     "ui_settings": {
         "show_overlay": true,
         "recommendation_display_time": 5000
+    },
+    "platform_settings": {
+        "global_poker": {
+            "auto_detect_currency": true,
+            "default_currency": "GC",
+            "table_theme": "green"
+        }
     }
 }
