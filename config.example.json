@@ -1,0 +1,19 @@
+{
+    "screenshot_interval_ms": 250,
+    "chrome_tab_name": null,
+    "detection_confidence": 0.8,
+    "solver_settings": {
+        "aggression_factor": 0.5,
+        "consider_pot_odds": true,
+        "player_count": null,
+        "chip_stack": null
+    },
+    "card_detection": {
+        "template_matching_threshold": 0.85,
+        "use_ocr_fallback": true
+    },
+    "ui_settings": {
+        "show_overlay": true,
+        "recommendation_display_time": 5000
+    }
+}
