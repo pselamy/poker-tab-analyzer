@@ -4,6 +4,9 @@
 
 echo "Building Poker Tab Analyzer..."
 
+# Clean dist directory
+rm -rf dist
+
 # Compile TypeScript
 npx tsc
 
@@ -19,7 +22,10 @@ cp extension/*.css dist/extension/
 if [ ! -f dist/extension/background.js ]; then
   cp dist/extension/*.js dist/extension/ 2>/dev/null || true
 fi
-cp -r dist/lib dist/extension/
+
+# Copy lib files but exclude test files
+mkdir -p dist/extension/lib
+find dist/lib -name "*.js" -not -name "*.test.js" -not -name "*_test.js" -exec cp {} dist/extension/lib/ \;
 
 # Create icons
 mkdir -p dist/extension/icons
