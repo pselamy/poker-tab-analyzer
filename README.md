@@ -1,186 +1,194 @@
 # Poker Tab Analyzer
 
-A real-time poker hand analyzer that uses computer vision to work with ANY online poker platform. Available as both a Chrome extension and standalone Python application.
+A Chrome extension that provides real-time poker hand analysis using computer vision and the pokersolver library.
 
-## 🎯 Key Features
+## Features
 
-- **Universal Compatibility**: Works with any poker site using computer vision
-- **Chrome Extension**: Native browser integration for best performance
-- **Real-time Analysis**: 250ms detection intervals
-- **No Configuration**: Automatically detects cards, pot size, and game state
-- **Privacy-First**: All processing happens locally
+- **Generic Computer Vision**: Works with any poker site - no configuration needed
+- **Real-time Analysis**: Analyzes hands every 250ms (configurable)
+- **Poker Solver Integration**: Uses pokersolver.js for hand evaluation
+- **Privacy First**: All processing happens locally in your browser
+- **Comprehensive Tests**: Full test coverage for reliability
 
-## 🚀 Quick Start
+## Installation
 
-### Option 1: Chrome Extension (Recommended)
-
-1. **Install the extension**:
-   ```bash
-   cd chrome-extension
-   # Open chrome://extensions in Developer mode
-   # Click "Load unpacked" and select this folder
-   ```
-
-2. **Visit any poker site** and click the extension icon
-
-3. **Start playing** - cards are detected automatically!
-
-See [Chrome Extension README](chrome-extension/README.md) for full details.
-
-### Option 2: Standalone Python
+### From Source
 
 ```bash
-# Generic version (works anywhere)
-python main_v2.py --debug
-
-# Original version
-python main.py
-```
-
-## 📁 Project Structure
-
-```
-poker-tab-analyzer/
-├── chrome-extension/      # Browser extension (NEW!)
-│   ├── manifest.json     # Extension config
-│   ├── content.js        # Vision-based detection
-│   ├── background.js     # Extension service worker
-│   └── popup.html/js     # Control interface
-├── native-host/          # Python solver bridge
-├── src/
-│   ├── detection/        # Computer vision modules
-│   │   ├── universal_detector.py
-│   │   └── fast_detector.py
-│   └── capture/          # Screen capture
-└── main_v2.py           # Standalone Python app
-```
-
-## 🎮 Supported Platforms
-
-Works automatically with:
-- Global Poker ✅
-- PokerStars ✅
-- GGPoker ✅
-- Americas Cardroom ✅
-- WSOP ✅
-- Any poker site with visible cards ✅
-
-## 🔧 How It Works
-
-### Computer Vision Detection
-
-Instead of hard-coding regions for each site, the analyzer:
-
-1. **Finds card-shaped objects** (white rectangles)
-2. **Detects ranks** using pattern matching
-3. **Identifies suits** by color
-4. **Locates pot size** using OCR
-5. **Tracks game state** dynamically
-
-### Chrome Extension Architecture
-
-```javascript
-// Content Script - Runs on poker sites
-captureAndAnalyze() {
-  // Find poker table element
-  // Capture as image
-  // Detect cards using CV
-  // Send to solver
-}
-
-// Background Script - Manages state
-analyzeHand(detection) {
-  // Process detection
-  // Run solver logic
-  // Return recommendation
-}
-```
-
-## 🛠️ Development
-
-### Building from Source
-
-```bash
-# Clone repository
+# Clone the repository
 git clone https://github.com/pselamy/poker-tab-analyzer.git
 cd poker-tab-analyzer
 
-# Set up Python environment
-./setup.sh
-source venv/bin/activate
+# Install dependencies
+pnpm install
 
-# Install Chrome extension
-cd chrome-extension
-# Load in Chrome as unpacked extension
+# Run tests
+./test.sh
 
-# (Optional) Set up native solver
-cd ../native-host
-./install.sh
+# Build extension
+./build.sh
 ```
 
-### Testing
+### Load in Chrome
+
+1. Open Chrome and go to `chrome://extensions/`
+2. Enable "Developer mode"
+3. Click "Load unpacked"
+4. Select the `dist/extension` directory
+
+## Usage
+
+1. Navigate to any poker site
+2. Click the extension icon
+3. Click "Start Analysis"
+4. Play poker - the extension will detect cards and provide recommendations
+
+## Development
+
+### Project Structure
+
+```
+poker-tab-analyzer/
+├── MODULE.bazel          # Bazel module configuration
+├── extension/            # Chrome extension source
+│   ├── content.ts       # Content script
+│   ├── background.ts    # Service worker
+│   └── popup.ts         # Extension UI
+├── lib/                 # Core libraries
+│   ├── detector.ts      # Computer vision card detection
+│   ├── solver.ts        # Poker solver wrapper
+│   └── vision.ts        # Image processing utilities
+└── tests/               # Test files
+```
+
+### Running Tests
 
 ```bash
-# Test detection algorithms
-python test_generic_detection.py
+# Run all tests
+./test.sh
 
-# Test with examples
-python examples.py
+# Run tests with Node.js directly
+node --test dist/**/*_test.js
 
-# Test Chrome extension
-# Open chrome-extension/test-page.html in browser
+# Type check
+pnpm tsc --noEmit
 ```
 
-## 📊 Performance
+### Building
 
-- **Fast Mode**: 10-50ms per frame (default)
-- **Accurate Mode**: 100-200ms per frame
-- **Chrome Extension**: Native performance
-- **CPU Usage**: ~5-10% on modern hardware
+```bash
+# Build extension
+./build.sh
 
-## 🔐 Privacy & Security
+# Output will be in:
+# - dist/extension/ (unpacked extension)
+# - dist/poker-tab-analyzer.zip (packaged extension)
+```
 
-- ✅ **100% Local**: No data leaves your computer
-- ✅ **Open Source**: Inspect all code
-- ✅ **No Screenshots Saved**: Only processes in memory
-- ✅ **No Network Requests**: Works offline
+## How It Works
 
-## 📈 Roadmap
+### Extension Architecture
 
-- [x] Generic computer vision detection
-- [x] Chrome extension
-- [x] Multi-platform support
-- [ ] Advanced OCR for pot/stacks
-- [ ] GTO solver integration
-- [ ] Hand history tracking
-- [ ] Multi-table support
-- [ ] Mobile app
+```mermaid
+graph LR
+    U[User] -->|Clicks Icon| P[Popup UI]
+    P -->|Start Analysis| CS[Content Script]
+    CS -->|Request Screenshot| BG[Background Worker]
+    BG -->|Capture Tab| CS
+    CS -->|Analyze Image| D[Detector]
+    D -->|Found Cards| S[Solver]
+    S -->|Recommendation| CS
+    CS -->|Display Overlay| U
+```
 
-## 🤝 Contributing
+### Card Detection Process
 
-Contributions welcome! Areas to help:
+```mermaid
+flowchart TD
+    IMG[Screenshot] --> GRAY[Convert to Grayscale]
+    GRAY --> THRESH[Apply Threshold]
+    THRESH --> REGIONS[Find White Regions]
+    REGIONS --> FILTER{Card Shape?}
+    FILTER -->|Yes| CARD[Extract Card Region]
+    FILTER -->|No| SKIP[Skip Region]
+    CARD --> OCR[Recognize Rank/Suit]
+    OCR --> RESULT[Card Object]
+```
 
-1. Test on your favorite poker site
-2. Improve card detection accuracy
-3. Add solver algorithms
-4. Enhance performance
-5. Create UI improvements
+### Hand Analysis Flow
 
-## 📄 License
+```mermaid
+sequenceDiagram
+    participant CS as Content Script
+    participant DET as Detector
+    participant SOL as Solver
+    participant UI as Overlay
+    
+    CS->>DET: detectTable(imageData)
+    DET->>DET: Find hole cards
+    DET->>DET: Find community cards
+    DET-->>CS: TableState
+    CS->>SOL: analyze(cards, pot, players)
+    SOL->>SOL: Evaluate hand strength
+    SOL->>SOL: Calculate win probability
+    SOL-->>CS: SolverResult
+    CS->>UI: Update overlay
+    UI-->>CS: Display recommendation
+```
 
-MIT License - see [LICENSE](LICENSE) file
+### Computer Vision Pipeline
 
-## ⚠️ Disclaimer
+```mermaid
+graph TD
+    subgraph "Image Processing"
+        I1[Input Image] --> F1[Flood Fill]
+        F1 --> R1[Rectangle Detection]
+        R1 --> A1[Aspect Ratio Check]
+    end
+    
+    subgraph "Card Classification"
+        A1 --> C1[Y-Position Check]
+        C1 -->|Bottom Half| H1[Hole Cards]
+        C1 -->|Top Half| C2[Community Cards]
+    end
+    
+    subgraph "Game State"
+        H1 --> GS[Table State]
+        C2 --> GS
+        GS --> OUT[Output]
+    end
+```
 
-This tool is for educational and analytical purposes. Always follow the terms of service of the poker sites you use. The authors are not responsible for any misuse of this software.
+### Extension Communication
 
-## 🔗 Links
+```mermaid
+flowchart LR
+    subgraph "Browser Tab"
+        PAGE[Web Page]
+        CS[Content Script]
+        OV[Overlay UI]
+    end
+    
+    subgraph "Extension"
+        POP[Popup]
+        BG[Background]
+    end
+    
+    PAGE -.->|DOM Access| CS
+    CS <-->|Messages| BG
+    BG <-->|Chrome API| POP
+    CS -->|Inject| OV
+    OV -->|Display| PAGE
+```
 
-- [Chrome Extension Guide](chrome-extension/README.md)
-- [Migration from v1](MIGRATION.md)
-- [Generic Detection Docs](README_GENERIC.md)
-- [Examples](examples.py)
+## Contributing
 
----
+1. Fork the repository
+2. Create a feature branch
+3. Write tests for your changes
+4. Ensure `bazel test //...` passes
+5. Submit a pull request
 
-Made with ♠♥♦♣ by poker enthusiasts, for poker enthusiasts
+## License
+
+MIT License - see LICENSE file for details
