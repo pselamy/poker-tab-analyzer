@@ -2,8 +2,8 @@
  * Content script that runs on poker sites
  */
 
-import { PokerDetector } from "../lib/detector";
-import { PokerSolver } from "../lib/solver";
+import { PokerDetector } from "../lib/detector.js";
+import { PokerSolver } from "../lib/solver.js";
 
 class PokerAnalyzer {
   private detector: PokerDetector;

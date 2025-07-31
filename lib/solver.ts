@@ -3,7 +3,8 @@
  */
 
 // @ts-ignore - pokersolver doesn't have types
-import { Hand } from "pokersolver";
+import pokersolver from "pokersolver";
+const { Hand } = pokersolver;
 
 export interface HandAnalysis {
   hand: string;
@@ -85,8 +86,11 @@ export class PokerSolver {
       "♦": "d",
       "♣": "c",
     };
+    
+    // Convert 10 to T for pokersolver
+    const formattedRank = rank === '10' ? 'T' : rank;
 
-    return rank + (suitMap[suit] || suit);
+    return formattedRank + (suitMap[suit] || suit);
   }
 
   /**
@@ -97,21 +101,34 @@ export class PokerSolver {
     communityCount: number,
     playerCount: number,
   ): number {
-    // Hand strength ranges from 1 (high card) to 9 (straight flush)
-    const baseStrength = hand.rank / 9;
+    // pokersolver ranks: 1=high card, 2=pair, 3=two pair, 4=three of a kind,
+    // 5=straight, 6=flush, 7=full house, 8=four of a kind, 9=straight flush
+    
+    // Base probabilities for each hand type
+    const handStrengths: Record<number, number> = {
+      1: 0.17,  // High card
+      2: 0.45,  // One pair
+      3: 0.65,  // Two pair
+      4: 0.75,  // Three of a kind
+      5: 0.80,  // Straight
+      6: 0.85,  // Flush
+      7: 0.90,  // Full house
+      8: 0.95,  // Four of a kind
+      9: 0.99,  // Straight flush
+    };
+    
+    let baseStrength = handStrengths[hand.rank] || 0.5;
+    
+    // Special case for pocket aces preflop
+    if (communityCount === 0 && hand.name === 'Pair' && hand.cards && 
+        hand.cards[0] && hand.cards[0].rank === 'A') {
+      baseStrength = 0.85;
+    }
 
-    // Adjust for game stage
-    let stageMultiplier = 1;
-    if (communityCount === 0)
-      stageMultiplier = 0.8; // Pre-flop
-    else if (communityCount === 3)
-      stageMultiplier = 0.9; // Flop
-    else if (communityCount === 4) stageMultiplier = 0.95; // Turn
-
-    // Adjust for number of players
-    const playerMultiplier = Math.pow(0.85, playerCount - 1);
-
-    return Math.min(baseStrength * stageMultiplier * playerMultiplier, 0.95);
+    // Adjust for number of players (each additional player reduces win probability)
+    const playerAdjustment = Math.pow(0.9, playerCount - 2);
+    
+    return Math.min(baseStrength * playerAdjustment, 0.95);
   }
 
   /**

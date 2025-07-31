@@ -14,7 +14,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./",
-    "types": ["chrome", "jasmine"]
+    "types": ["chrome", "jasmine", "node"]
   },
   "include": ["extension/**/*.ts", "lib/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist", "bazel-*"]

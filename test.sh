@@ -4,10 +4,10 @@
 
 echo "Running tests..."
 
-# Compile tests
+# Compile TypeScript
 npx tsc
 
-# Run tests with Node.js built-in test runner
-node --test dist/**/*_test.js
+# Run tests with Node.js
+node --test dist/lib/*.test.js
 
 echo "✅ Tests complete!"
