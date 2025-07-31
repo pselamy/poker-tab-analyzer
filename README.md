@@ -109,8 +109,12 @@ pnpm tsc --noEmit
 # Output locations:
 # - dist/extension/ - Unpacked extension (load this in Chrome)
 # - dist/poker-tab-analyzer.zip - Packaged extension (for distribution)
+```
 
-# Clean build artifacts
+### Cleaning
+
+```bash
+# Clean build artifacts (removes dist/ directory)
 pnpm clean  # or: rm -rf dist/
 ```
 
