@@ -3,13 +3,8 @@
   "name": "Poker Tab Analyzer",
   "version": "1.0.0",
   "description": "Real-time poker hand analysis using computer vision",
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {

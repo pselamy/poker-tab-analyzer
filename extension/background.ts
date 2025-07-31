@@ -23,21 +23,21 @@ class BackgroundService {
   private setupMessageListeners() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       switch (request.type) {
-        case 'CAPTURE_TAB':
+        case "CAPTURE_TAB":
           this.captureTab(sender.tab?.id).then(sendResponse);
           return true; // Will respond asynchronously
 
-        case 'TABLE_UPDATE':
+        case "TABLE_UPDATE":
           if (sender.tab?.id) {
             this.addToHistory(sender.tab.id, request.data);
           }
           break;
 
-        case 'GET_HISTORY':
+        case "GET_HISTORY":
           sendResponse(this.getHistory(request.tabId));
           break;
 
-        case 'CLEAR_HISTORY':
+        case "CLEAR_HISTORY":
           this.clearHistory(request.tabId);
           sendResponse({ success: true });
           break;
@@ -58,7 +58,7 @@ class BackgroundService {
     setInterval(() => {
       const cutoff = Date.now() - 3600000; // 1 hour
       for (const [tabId, updates] of this.history.entries()) {
-        const filtered = updates.filter(u => u.timestamp > cutoff);
+        const filtered = updates.filter((u) => u.timestamp > cutoff);
         if (filtered.length === 0) {
           this.history.delete(tabId);
         } else {
@@ -72,15 +72,13 @@ class BackgroundService {
    * Capture tab screenshot
    */
   private async captureTab(tabId?: number): Promise<string> {
-    if (!tabId) throw new Error('No tab ID');
+    if (!tabId) throw new Error("No tab ID");
 
     try {
-      const dataUrl = await chrome.tabs.captureVisibleTab(
-        { format: 'png' }
-      );
+      const dataUrl = await chrome.tabs.captureVisibleTab({ format: "png" });
       return dataUrl;
     } catch (error) {
-      console.error('Failed to capture tab:', error);
+      console.error("Failed to capture tab:", error);
       throw error;
     }
   }
@@ -97,7 +95,7 @@ class BackgroundService {
 
     const tabHistory = this.history.get(tabId) || [];
     tabHistory.push(update);
-    
+
     // Keep only last 1000 updates per tab
     if (tabHistory.length > 1000) {
       tabHistory.shift();

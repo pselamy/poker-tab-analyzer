@@ -16,14 +16,6 @@
     "rootDir": "./",
     "types": ["chrome", "jasmine"]
   },
-  "include": [
-    "extension/**/*.ts",
-    "lib/**/*.ts",
-    "tests/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "bazel-*"
-  ]
+  "include": ["extension/**/*.ts", "lib/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist", "bazel-*"]
 }

@@ -40,7 +40,7 @@ export class VisionUtils {
    */
   static threshold(gray: Uint8Array, threshold: number = 128): Uint8Array {
     const binary = new Uint8Array(gray.length);
-    
+
     for (let i = 0; i < gray.length; i++) {
       binary[i] = gray[i] > threshold ? 255 : 0;
     }
@@ -51,17 +51,29 @@ export class VisionUtils {
   /**
    * Find contours in binary image
    */
-  static findContours(binary: Uint8Array, width: number, height: number): Point[][] {
+  static findContours(
+    binary: Uint8Array,
+    width: number,
+    height: number,
+  ): Point[][] {
     const visited = new Uint8Array(binary.length);
     const contours: Point[][] = [];
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = y * width + x;
-        
+
         if (binary[idx] === 255 && !visited[idx]) {
-          const contour = this.traceContour(binary, width, height, x, y, visited);
-          if (contour.length > 10) { // Filter small contours
+          const contour = this.traceContour(
+            binary,
+            width,
+            height,
+            x,
+            y,
+            visited,
+          );
+          if (contour.length > 10) {
+            // Filter small contours
             contours.push(contour);
           }
         }
@@ -80,13 +92,18 @@ export class VisionUtils {
     height: number,
     startX: number,
     startY: number,
-    visited: Uint8Array
+    visited: Uint8Array,
   ): Point[] {
     const contour: Point[] = [];
     const directions = [
-      [-1, -1], [0, -1], [1, -1],
-      [-1, 0],           [1, 0],
-      [-1, 1],  [0, 1],  [1, 1]
+      [-1, -1],
+      [0, -1],
+      [1, -1],
+      [-1, 0],
+      [1, 0],
+      [-1, 1],
+      [0, 1],
+      [1, 1],
     ];
 
     let x = startX;
@@ -133,8 +150,10 @@ export class VisionUtils {
     width: number;
     height: number;
   } {
-    let minX = Infinity, maxX = -Infinity;
-    let minY = Infinity, maxY = -Infinity;
+    let minX = Infinity,
+      maxX = -Infinity;
+    let minY = Infinity,
+      maxY = -Infinity;
 
     for (const point of contour) {
       minX = Math.min(minX, point.x);
@@ -158,11 +177,16 @@ export class VisionUtils {
     r: number,
     g: number,
     b: number,
-    range: ColorRange
+    range: ColorRange,
   ): boolean {
-    return r >= range.minR && r <= range.maxR &&
-           g >= range.minG && g <= range.maxG &&
-           b >= range.minB && b <= range.maxB;
+    return (
+      r >= range.minR &&
+      r <= range.maxR &&
+      g >= range.minG &&
+      g <= range.maxG &&
+      b >= range.minB &&
+      b <= range.maxB
+    );
   }
 
   /**
@@ -170,7 +194,7 @@ export class VisionUtils {
    */
   static histogram(gray: Uint8Array): number[] {
     const hist = new Array(256).fill(0);
-    
+
     for (const value of gray) {
       hist[value]++;
     }

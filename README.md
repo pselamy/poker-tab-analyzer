@@ -123,7 +123,7 @@ sequenceDiagram
     participant DET as Detector
     participant SOL as Solver
     participant UI as Overlay
-    
+
     CS->>DET: detectTable(imageData)
     DET->>DET: Find hole cards
     DET->>DET: Find community cards
@@ -145,13 +145,13 @@ graph TD
         F1 --> R1[Rectangle Detection]
         R1 --> A1[Aspect Ratio Check]
     end
-    
+
     subgraph "Card Classification"
         A1 --> C1[Y-Position Check]
         C1 -->|Bottom Half| H1[Hole Cards]
         C1 -->|Top Half| C2[Community Cards]
     end
-    
+
     subgraph "Game State"
         H1 --> GS[Table State]
         C2 --> GS
@@ -168,12 +168,12 @@ flowchart LR
         CS[Content Script]
         OV[Overlay UI]
     end
-    
+
     subgraph "Extension"
         POP[Popup]
         BG[Background]
     end
-    
+
     PAGE -.->|DOM Access| CS
     CS <-->|Messages| BG
     BG <-->|Chrome API| POP

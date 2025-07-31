@@ -31,6 +31,9 @@ devDependencies:
   karma-jasmine:
     specifier: ^5.1.0
     version: 5.1.0(karma@6.4.4)
+  prettier:
+    specifier: ^3.6.2
+    version: 3.6.2
   typescript:
     specifier: ^5.3.0
     version: 5.8.3
@@ -947,6 +950,12 @@ packages:
     resolution: {integrity: sha512-vmgZS+K8H8r1RePQykFM5YyvlKo1v3xVec8FMBjg9N6mR2Tj/n/X415w+lG67FWbrk71D/CADmKFinDgaQlAsw==}
     engines: {'0': node >= 4.0.0}
     dev: false
+
+  /prettier@3.6.2:
+    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
 
   /punycode@1.4.1:
     resolution: {integrity: sha512-jmYNElW7yvO7TV33CjSmvSiE2yco3bV2czu/OzDKdMNVZQWfxCblURLhf+47syQRBntjfLdd/H0egrzIG+oaFQ==}

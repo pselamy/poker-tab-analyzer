@@ -30,8 +30,8 @@ export class PokerDetector {
   private ctx: CanvasRenderingContext2D;
 
   constructor() {
-    this.canvas = document.createElement('canvas');
-    this.ctx = this.canvas.getContext('2d')!;
+    this.canvas = document.createElement("canvas");
+    this.ctx = this.canvas.getContext("2d")!;
   }
 
   /**
@@ -44,7 +44,7 @@ export class PokerDetector {
 
     const cards = await this.detectCards(imageData);
     const [holeCards, communityCards] = this.classifyCards(cards);
-    
+
     return {
       holeCards,
       communityCards,
@@ -60,14 +60,14 @@ export class PokerDetector {
    */
   private async detectCards(imageData: ImageData): Promise<Card[]> {
     const regions = this.findWhiteRegions(imageData);
-    const cardRegions = regions.filter(r => this.isCardShape(r));
-    
+    const cardRegions = regions.filter((r) => this.isCardShape(r));
+
     const cards: Card[] = [];
     for (const region of cardRegions) {
       const card = await this.recognizeCard(imageData, region);
       if (card) cards.push(card);
     }
-    
+
     return cards;
   }
 
@@ -109,17 +109,19 @@ export class PokerDetector {
     height: number,
     startX: number,
     startY: number,
-    visited: Uint8Array
+    visited: Uint8Array,
   ): Rectangle | null {
     const stack = [[startX, startY]];
-    let minX = startX, maxX = startX;
-    let minY = startY, maxY = startY;
+    let minX = startX,
+      maxX = startX;
+    let minY = startY,
+      maxY = startY;
     let pixelCount = 0;
 
     while (stack.length > 0) {
       const [x, y] = stack.pop()!;
       const idx = y * width + x;
-      
+
       if (x < 0 || x >= width || y < 0 || y >= height || visited[idx]) {
         continue;
       }
@@ -132,7 +134,7 @@ export class PokerDetector {
       if (r > 240 && g > 240 && b > 240) {
         visited[idx] = 1;
         pixelCount++;
-        
+
         minX = Math.min(minX, x);
         maxX = Math.max(maxX, x);
         minY = Math.min(minY, y);
@@ -158,31 +160,58 @@ export class PokerDetector {
    */
   private isCardShape(region: Rectangle): boolean {
     const aspectRatio = region.width / region.height;
-    return aspectRatio > 0.6 && aspectRatio < 0.8 && 
-           region.width > 40 && region.height > 60;
+    return (
+      aspectRatio > 0.6 &&
+      aspectRatio < 0.8 &&
+      region.width > 40 &&
+      region.height > 60
+    );
   }
 
   /**
    * Recognize card rank and suit
    */
-  private async recognizeCard(imageData: ImageData, bounds: Rectangle): Promise<Card | null> {
+  private async recognizeCard(
+    imageData: ImageData,
+    bounds: Rectangle,
+  ): Promise<Card | null> {
     // Extract card region
-    const cardCanvas = document.createElement('canvas');
+    const cardCanvas = document.createElement("canvas");
     cardCanvas.width = bounds.width;
     cardCanvas.height = bounds.height;
-    const cardCtx = cardCanvas.getContext('2d')!;
-    
+    const cardCtx = cardCanvas.getContext("2d")!;
+
     cardCtx.drawImage(
       this.canvas,
-      bounds.x, bounds.y, bounds.width, bounds.height,
-      0, 0, bounds.width, bounds.height
+      bounds.x,
+      bounds.y,
+      bounds.width,
+      bounds.height,
+      0,
+      0,
+      bounds.width,
+      bounds.height,
     );
 
     // TODO: Implement actual OCR/template matching
     // For now, return mock data
-    const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-    const suits = ['♠', '♥', '♦', '♣'];
-    
+    const ranks = [
+      "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "J",
+      "Q",
+      "K",
+    ];
+    const suits = ["♠", "♥", "♦", "♣"];
+
     return {
       rank: ranks[Math.floor(Math.random() * ranks.length)],
       suit: suits[Math.floor(Math.random() * suits.length)],
@@ -199,10 +228,10 @@ export class PokerDetector {
     cards.sort((a, b) => a.bounds.y - b.bounds.y);
 
     // Cards in bottom half are likely hole cards
-    const midY = Math.max(...cards.map(c => c.bounds.y)) / 2;
-    
-    const holeCards = cards.filter(c => c.bounds.y > midY);
-    const communityCards = cards.filter(c => c.bounds.y <= midY);
+    const midY = Math.max(...cards.map((c) => c.bounds.y)) / 2;
+
+    const holeCards = cards.filter((c) => c.bounds.y > midY);
+    const communityCards = cards.filter((c) => c.bounds.y <= midY);
 
     return [holeCards.slice(0, 2), communityCards.slice(0, 5)];
   }
