@@ -5,7 +5,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run compile && node --test dist/lib/*_test.js",
+    "test": "npm run compile && node --test dist/lib/*.test.js",
+    "test:e2e": "npm run build && jest --config jest.config.cjs",
+    "test:e2e:watch": "npm run build && jest --config jest.config.cjs --watch",
+    "test:all": "npm run test && npm run test:e2e",
     "compile": "tsc",
     "build": "./build.sh",
     "clean": "rm -rf dist"
@@ -13,14 +16,19 @@
   "devDependencies": {
     "@types/chrome": "^0.0.251",
     "@types/jasmine": "^4.3.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.10.0",
+    "@types/puppeteer": "^7.0.4",
     "@vitest/ui": "^3.2.4",
     "happy-dom": "^18.0.1",
     "jasmine": "^5.1.0",
+    "jest": "^30.0.5",
     "karma": "^6.4.2",
     "karma-chrome-launcher": "^3.2.0",
     "karma-jasmine": "^5.1.0",
     "prettier": "^3.6.2",
+    "puppeteer": "^24.15.0",
+    "ts-jest": "^29.4.0",
     "typescript": "^5.3.0",
     "vitest": "^3.2.4"
   },
