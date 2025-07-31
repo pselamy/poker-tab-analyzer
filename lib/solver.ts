@@ -86,9 +86,9 @@ export class PokerSolver {
       "♦": "d",
       "♣": "c",
     };
-    
+
     // Convert 10 to T for pokersolver
-    const formattedRank = rank === '10' ? 'T' : rank;
+    const formattedRank = rank === "10" ? "T" : rank;
 
     return formattedRank + (suitMap[suit] || suit);
   }
@@ -103,31 +103,36 @@ export class PokerSolver {
   ): number {
     // pokersolver ranks: 1=high card, 2=pair, 3=two pair, 4=three of a kind,
     // 5=straight, 6=flush, 7=full house, 8=four of a kind, 9=straight flush
-    
+
     // Base probabilities for each hand type
     const handStrengths: Record<number, number> = {
-      1: 0.17,  // High card
-      2: 0.45,  // One pair
-      3: 0.65,  // Two pair
-      4: 0.75,  // Three of a kind
-      5: 0.80,  // Straight
-      6: 0.85,  // Flush
-      7: 0.90,  // Full house
-      8: 0.95,  // Four of a kind
-      9: 0.99,  // Straight flush
+      1: 0.17, // High card
+      2: 0.45, // One pair
+      3: 0.65, // Two pair
+      4: 0.75, // Three of a kind
+      5: 0.8, // Straight
+      6: 0.85, // Flush
+      7: 0.9, // Full house
+      8: 0.95, // Four of a kind
+      9: 0.99, // Straight flush
     };
-    
+
     let baseStrength = handStrengths[hand.rank] || 0.5;
-    
+
     // Special case for pocket aces preflop
-    if (communityCount === 0 && hand.name === 'Pair' && hand.cards && 
-        hand.cards[0] && hand.cards[0].rank === 'A') {
+    if (
+      communityCount === 0 &&
+      hand.name === "Pair" &&
+      hand.cards &&
+      hand.cards[0] &&
+      hand.cards[0].rank === "A"
+    ) {
       baseStrength = 0.85;
     }
 
     // Adjust for number of players (each additional player reduces win probability)
     const playerAdjustment = Math.pow(0.9, playerCount - 2);
-    
+
     return Math.min(baseStrength * playerAdjustment, 0.95);
   }
 

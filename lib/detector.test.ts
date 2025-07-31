@@ -2,33 +2,33 @@
  * Tests for PokerDetector
  */
 
-import { test } from 'node:test';
-import assert from 'node:assert';
-import { PokerDetector } from './detector.js';
+import { test } from "node:test";
+import assert from "node:assert";
+import { PokerDetector } from "./detector.js";
 
 // Mock DOM globals
 global.document = {
   createElement: (tag: string) => {
-    if (tag === 'canvas') {
+    if (tag === "canvas") {
       return {
         getContext: () => ({
           drawImage: () => {},
           putImageData: () => {},
-          getImageData: () => new ImageData(100, 100)
+          getImageData: () => new ImageData(100, 100),
         }),
         width: 0,
-        height: 0
+        height: 0,
       };
     }
     return {};
-  }
+  },
 } as any;
 
 global.ImageData = class ImageData {
   data: Uint8ClampedArray;
   width: number;
   height: number;
-  
+
   constructor(arg1: Uint8ClampedArray | number, arg2: number, arg3?: number) {
     if (arg1 instanceof Uint8ClampedArray) {
       this.data = arg1;
@@ -42,7 +42,7 @@ global.ImageData = class ImageData {
   }
 } as any;
 
-test('PokerDetector - should detect empty table', async () => {
+test("PokerDetector - should detect empty table", async () => {
   const detector = new PokerDetector();
   const imageData = new ImageData(800, 600);
   // Fill with white
@@ -52,20 +52,20 @@ test('PokerDetector - should detect empty table', async () => {
     imageData.data[i + 2] = 255;
     imageData.data[i + 3] = 255;
   }
-  
+
   const result = await detector.detectTable(imageData);
-  
+
   assert.deepStrictEqual(result.holeCards, []);
   assert.deepStrictEqual(result.communityCards, []);
-  assert.strictEqual(result.potSize, '0');
+  assert.strictEqual(result.potSize, "0");
 });
 
-test('PokerDetector - should detect game state', async () => {
+test("PokerDetector - should detect game state", async () => {
   const detector = new PokerDetector();
   const imageData = new ImageData(1200, 800);
-  
+
   const result = await detector.detectTable(imageData);
-  
+
   assert.ok(result.playerCount > 0);
   assert.ok(result.playerCount <= 10);
   assert.ok(result.dealerPosition >= 0);

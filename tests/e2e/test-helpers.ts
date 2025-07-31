@@ -1,10 +1,13 @@
-import { Page } from 'puppeteer';
+import { Page } from "puppeteer";
 
-export async function waitForContentScript(page: Page, timeout = 5000): Promise<boolean> {
+export async function waitForContentScript(
+  page: Page,
+  timeout = 5000,
+): Promise<boolean> {
   try {
     await page.waitForFunction(
-      () => window.hasOwnProperty('__pokerAnalyzerInjected'),
-      { timeout }
+      () => window.hasOwnProperty("__pokerAnalyzerInjected"),
+      { timeout },
     );
     return true;
   } catch (error) {
@@ -12,7 +15,10 @@ export async function waitForContentScript(page: Page, timeout = 5000): Promise<
   }
 }
 
-export async function createMockPokerPage(page: Page, cards: string[]): Promise<void> {
+export async function createMockPokerPage(
+  page: Page,
+  cards: string[],
+): Promise<void> {
   await page.setContent(`
     <!DOCTYPE html>
     <html>
@@ -39,19 +45,22 @@ export async function createMockPokerPage(page: Page, cards: string[]): Promise<
     <body>
       <h1>Poker Test Page</h1>
       <div class="card-container">
-        ${cards.map(card => `<div class="card" data-card="${card}">${card}</div>`).join('')}
+        ${cards.map((card) => `<div class="card" data-card="${card}">${card}</div>`).join("")}
       </div>
     </body>
     </html>
   `);
 }
 
-export function parseCardNotation(card: string): { rank: string; suit: string } {
+export function parseCardNotation(card: string): {
+  rank: string;
+  suit: string;
+} {
   const rank = card.slice(0, -1);
   const suit = card.slice(-1);
   return { rank, suit };
 }
 
 export async function getAnalysisResults(page: Page): Promise<string> {
-  return await page.$eval('#results', (el) => el.textContent || '');
+  return await page.$eval("#results", (el) => el.textContent || "");
 }
