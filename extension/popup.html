@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Poker Tab Analyzer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Poker Tab Analyzer</h1>
+      <div class="status-indicator" id="status">
+        <span class="status-dot"></span>
+        <span class="status-text">Inactive</span>
+      </div>
+    </header>
+
+    <main>
+      <div class="controls">
+        <button id="toggle-btn" class="btn btn-primary">
+          Start Analysis
+        </button>
+        
+        <div class="interval-control">
+          <label for="interval">Update Interval (ms):</label>
+          <input type="number" id="interval" min="100" max="1000" step="50" value="250">
+        </div>
+      </div>
+
+      <div class="stats" id="stats">
+        <div class="stat-item">
+          <span class="stat-label">Hands Analyzed:</span>
+          <span class="stat-value" id="hand-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Current Session:</span>
+          <span class="stat-value" id="session-time">0:00</span>
+        </div>
+      </div>
+
+      <div class="current-hand" id="current-hand" style="display: none;">
+        <h3>Current Hand</h3>
+        <div class="hand-info">
+          <div class="cards" id="hole-cards"></div>
+          <div class="hand-strength" id="hand-strength"></div>
+          <div class="recommendation" id="recommendation"></div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <button id="history-btn" class="btn btn-secondary">View History</button>
+      <button id="settings-btn" class="btn btn-secondary">Settings</button>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

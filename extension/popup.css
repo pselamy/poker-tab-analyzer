@@ -1,0 +1,203 @@
+body {
+  width: 350px;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+.container {
+  padding: 16px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #333;
+}
+
+h1 {
+  margin: 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #666;
+  transition: background 0.3s;
+}
+
+.status-indicator.active .status-dot {
+  background: #4caf50;
+  box-shadow: 0 0 8px #4caf50;
+}
+
+.status-text {
+  font-size: 12px;
+  color: #999;
+}
+
+.controls {
+  margin-bottom: 20px;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #2196f3;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1976d2;
+}
+
+.btn-primary.active {
+  background: #f44336;
+}
+
+.btn-primary.active:hover {
+  background: #d32f2f;
+}
+
+.btn-secondary {
+  background: #333;
+  color: #e0e0e0;
+}
+
+.btn-secondary:hover {
+  background: #444;
+}
+
+.interval-control {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.interval-control label {
+  font-size: 12px;
+  color: #999;
+}
+
+.interval-control input {
+  flex: 1;
+  padding: 6px;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-size: 12px;
+}
+
+.stats {
+  background: #222;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.stat-item:last-child {
+  margin-bottom: 0;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.current-hand {
+  background: #222;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.current-hand h3 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #fff;
+}
+
+.cards {
+  font-size: 24px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.hand-strength {
+  font-size: 14px;
+  color: #4caf50;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.recommendation {
+  padding: 12px;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.recommendation.fold {
+  background: #f44336;
+  color: white;
+}
+
+.recommendation.check,
+.recommendation.call {
+  background: #ff9800;
+  color: white;
+}
+
+.recommendation.raise {
+  background: #4caf50;
+  color: white;
+}
+
+footer {
+  display: flex;
+  gap: 8px;
+}
+
+footer .btn {
+  flex: 1;
+  padding: 8px;
+  font-size: 12px;
+}

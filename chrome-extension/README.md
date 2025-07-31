@@ -37,6 +37,7 @@ Click the puzzle piece icon in Chrome's toolbar and pin the Poker Tab Analyzer.
 ### Automatic Mode
 
 The extension automatically starts when you visit a poker site:
+
 - GlobalPoker.com
 - PokerStars.com
 - GGPoker.com
@@ -61,6 +62,7 @@ The extension automatically starts when you visit a poker site:
 ## How It Works
 
 ### 1. Content Script (`content.js`)
+
 - Runs on poker sites
 - Captures table area every 250ms
 - Uses computer vision to detect:
@@ -70,12 +72,14 @@ The extension automatically starts when you visit a poker site:
   - Pot size (OCR in center)
 
 ### 2. Background Script (`background.js`)
+
 - Manages extension state
 - Handles tab screenshots
 - Communicates with solver
 - Stores detection history
 
 ### 3. Popup Interface (`popup.html`)
+
 - Shows current status
 - Controls start/stop
 - Displays statistics
