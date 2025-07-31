@@ -12,6 +12,11 @@ A Chrome extension that provides real-time poker hand analysis using computer vi
 
 ## Installation
 
+### Prerequisites
+
+- Node.js v18+ (for ES module support)
+- pnpm (install with `npm install -g pnpm`)
+
 ### From Source
 
 ```bash
@@ -22,19 +27,26 @@ cd poker-tab-analyzer
 # Install dependencies
 pnpm install
 
-# Run tests
+# Run tests (optional but recommended)
 ./test.sh
 
-# Build extension
+# Build the extension
 ./build.sh
 ```
 
 ### Load in Chrome
 
 1. Open Chrome and go to `chrome://extensions/`
-2. Enable "Developer mode"
+2. Enable "Developer mode" (toggle in top right)
 3. Click "Load unpacked"
-4. Select the `dist/extension` directory
+4. Select the `dist/extension` directory (created after running `./build.sh`)
+
+### Quick Start
+
+```bash
+# One-line build and test
+pnpm install && ./test.sh && ./build.sh
+```
 
 ## Usage
 
@@ -49,40 +61,66 @@ pnpm install
 
 ```
 poker-tab-analyzer/
-├── MODULE.bazel          # Bazel module configuration
 ├── extension/            # Chrome extension source
 │   ├── content.ts       # Content script
 │   ├── background.ts    # Service worker
-│   └── popup.ts         # Extension UI
+│   ├── popup.ts         # Extension UI
+│   ├── popup.html       # Extension popup interface
+│   ├── popup.css        # Extension styling
+│   └── manifest.json    # Chrome extension manifest
 ├── lib/                 # Core libraries
 │   ├── detector.ts      # Computer vision card detection
+│   ├── detector.test.ts # Detector unit tests
 │   ├── solver.ts        # Poker solver wrapper
-│   └── vision.ts        # Image processing utilities
-└── tests/               # Test files
+│   ├── solver.test.ts   # Solver unit tests
+│   ├── vision.ts        # Image processing utilities
+│   └── vision.test.ts   # Vision utils unit tests
+├── dist/                # Build output (git ignored)
+│   ├── extension/       # Compiled extension files
+│   └── lib/            # Compiled library files
+├── package.json         # Node.js dependencies
+├── pnpm-lock.yaml      # Lock file for pnpm
+├── tsconfig.json       # TypeScript configuration
+├── build.sh            # Build script
+├── test.sh             # Test runner script
+└── README.md           # This file
 ```
 
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (recommended)
 ./test.sh
 
-# Run tests with Node.js directly
-node --test dist/**/*_test.js
+# Run tests with Node.js directly (after building)
+pnpm compile
+node --test dist/lib/*.test.js
 
-# Type check
+# Type check only
 pnpm tsc --noEmit
 ```
 
 ### Building
 
 ```bash
-# Build extension
+# Build extension (cleans dist/ and rebuilds)
 ./build.sh
 
-# Output will be in:
-# - dist/extension/ (unpacked extension)
-# - dist/poker-tab-analyzer.zip (packaged extension)
+# Output locations:
+# - dist/extension/ - Unpacked extension (load this in Chrome)
+# - dist/poker-tab-analyzer.zip - Packaged extension (for distribution)
+
+# Clean build artifacts
+pnpm clean  # or: rm -rf dist/
+```
+
+### NPM Scripts
+
+```bash
+pnpm test     # Run tests
+pnpm compile  # Compile TypeScript only
+pnpm build    # Full build with packaging
+pnpm clean    # Remove build artifacts
 ```
 
 ## How It Works
