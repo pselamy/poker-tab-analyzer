@@ -36,7 +36,7 @@ if command -v convert &> /dev/null; then
   convert -size 48x48 xc:#2196f3 dist/extension/icon48.png
   convert -size 128x128 xc:#2196f3 dist/extension/icon128.png
 else
-  node create-icons.js
+  node create-icons.cjs
 fi
 
 # Create zip file
