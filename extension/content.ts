@@ -213,3 +213,6 @@ class PokerAnalyzer {
 
 // Initialize analyzer
 const analyzer = new PokerAnalyzer();
+
+// Mark content script as injected for testing
+(window as any).__pokerAnalyzerInjected = true;

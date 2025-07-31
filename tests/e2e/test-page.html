@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poker Test Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+    }
+    
+    .poker-table {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #27ae60;
+      border-radius: 100px;
+      padding: 40px;
+      position: relative;
+    }
+    
+    .community-cards {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .player-cards {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .card {
+      width: 70px;
+      height: 100px;
+      background: white;
+      border: 2px solid #333;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      position: relative;
+    }
+    
+    .card.hearts { color: #e74c3c; }
+    .card.diamonds { color: #e74c3c; }
+    .card.clubs { color: #2c3e50; }
+    .card.spades { color: #2c3e50; }
+    
+    .pot-size {
+      text-align: center;
+      font-size: 24px;
+      margin: 20px 0;
+    }
+    
+    .players {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 30px;
+    }
+    
+    .player {
+      text-align: center;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+    }
+    
+    .test-controls {
+      text-align: center;
+      margin-top: 30px;
+    }
+    
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0 5px;
+      font-size: 16px;
+    }
+    
+    button:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Poker Test Table</h1>
+  
+  <div class="poker-table">
+    <div class="pot-size">
+      Pot: $<span id="pot">500</span>
+    </div>
+    
+    <div class="community-cards" id="community-cards">
+      <!-- Community cards will be injected here -->
+    </div>
+    
+    <div class="player-cards" id="player-cards">
+      <!-- Player cards will be injected here -->
+    </div>
+    
+    <div class="players">
+      <div class="player">Player 1</div>
+      <div class="player">Player 2</div>
+      <div class="player">Player 3</div>
+      <div class="player">Player 4</div>
+    </div>
+  </div>
+  
+  <div class="test-controls">
+    <button onclick="setHand('royal-flush')">Royal Flush</button>
+    <button onclick="setHand('straight-flush')">Straight Flush</button>
+    <button onclick="setHand('four-kind')">Four of a Kind</button>
+    <button onclick="setHand('full-house')">Full House</button>
+    <button onclick="setHand('flush')">Flush</button>
+    <button onclick="setHand('straight')">Straight</button>
+    <button onclick="setHand('three-kind')">Three of a Kind</button>
+    <button onclick="setHand('two-pair')">Two Pair</button>
+    <button onclick="setHand('pair')">Pair</button>
+    <button onclick="setHand('high-card')">High Card</button>
+  </div>
+  
+  <script>
+    const hands = {
+      'royal-flush': {
+        player: ['AS', 'KS'],
+        community: ['QS', 'JS', '10S', '2H', '3D']
+      },
+      'straight-flush': {
+        player: ['6H', '7H'],
+        community: ['8H', '9H', '10H', '2S', '3C']
+      },
+      'four-kind': {
+        player: ['KD', 'KH'],
+        community: ['KC', 'KS', '3D', '7H', '9C']
+      },
+      'full-house': {
+        player: ['QC', 'QD'],
+        community: ['QH', '7C', '7D', '2S', '4H']
+      },
+      'flush': {
+        player: ['AD', '9D'],
+        community: ['KD', '7D', '3D', '2H', '4S']
+      },
+      'straight': {
+        player: ['9C', '10D'],
+        community: ['JH', 'QS', 'KC', '2D', '4H']
+      },
+      'three-kind': {
+        player: ['JD', 'JH'],
+        community: ['JS', '7C', '2D', '4S', '9H']
+      },
+      'two-pair': {
+        player: ['KH', 'KD'],
+        community: ['7S', '7C', '2D', '4H', '9C']
+      },
+      'pair': {
+        player: ['AH', 'AD'],
+        community: ['KS', '7C', '2D', '4H', '9C']
+      },
+      'high-card': {
+        player: ['AH', 'KD'],
+        community: ['QS', '7C', '2D', '4H', '9C']
+      }
+    };
+    
+    function createCard(card) {
+      const rank = card.slice(0, -1);
+      const suitMap = { 'H': '♥', 'D': '♦', 'C': '♣', 'S': '♠' };
+      const suitClass = { 'H': 'hearts', 'D': 'diamonds', 'C': 'clubs', 'S': 'spades' };
+      const suit = card.slice(-1);
+      
+      const cardDiv = document.createElement('div');
+      cardDiv.className = `card ${suitClass[suit]}`;
+      cardDiv.dataset.card = card;
+      cardDiv.textContent = rank + suitMap[suit];
+      
+      return cardDiv;
+    }
+    
+    function setHand(handType) {
+      const hand = hands[handType];
+      
+      // Clear existing cards
+      document.getElementById('player-cards').innerHTML = '';
+      document.getElementById('community-cards').innerHTML = '';
+      
+      // Add player cards
+      hand.player.forEach(card => {
+        document.getElementById('player-cards').appendChild(createCard(card));
+      });
+      
+      // Add community cards
+      hand.community.forEach(card => {
+        document.getElementById('community-cards').appendChild(createCard(card));
+      });
+      
+      // Update pot size randomly
+      document.getElementById('pot').textContent = Math.floor(Math.random() * 1000) + 100;
+    }
+    
+    // Set initial hand
+    setHand('pair');
+  </script>
+</body>
+</html>
