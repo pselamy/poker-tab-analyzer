@@ -30,9 +30,14 @@ find dist/lib -name "*.js" -not -name "*.test.js" -not -name "*_test.js" -exec c
 # Create icons
 mkdir -p dist/extension/icons
 echo "Creating placeholder icons..."
-convert -size 16x16 xc:#2196f3 dist/extension/icon16.png 2>/dev/null || echo "⚠️  Install ImageMagick for icons"
-convert -size 48x48 xc:#2196f3 dist/extension/icon48.png 2>/dev/null || echo ""
-convert -size 128x128 xc:#2196f3 dist/extension/icon128.png 2>/dev/null || echo ""
+# Try ImageMagick first, fallback to Node.js script
+if command -v convert &> /dev/null; then
+  convert -size 16x16 xc:#2196f3 dist/extension/icon16.png
+  convert -size 48x48 xc:#2196f3 dist/extension/icon48.png
+  convert -size 128x128 xc:#2196f3 dist/extension/icon128.png
+else
+  node create-icons.js
+fi
 
 # Create zip file
 cd dist/extension
