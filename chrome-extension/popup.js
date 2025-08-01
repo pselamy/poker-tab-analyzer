@@ -40,22 +40,22 @@ async function init() {
 
   // Get current state from background
   chrome.runtime.sendMessage({ action: "getState" }, (state) => {
-    console.log('[Popup] Received state:', state);
+    console.log("[Popup] Received state:", state);
     if (state) {
       // Update session data
       sessionData.handsAnalyzed = state.handsAnalyzed || 0;
       sessionData.sessionStartTime = state.sessionStartTime;
-      
+
       // Check if analyzer is running for this tab
       if (state.isRunning && state.currentTab === tab.id) {
         setRunningState(true);
         updateStats(state);
       }
-      
+
       // Show hands count even if not currently running
       if (state.handsAnalyzed > 0) {
         handsCount.textContent = state.handsAnalyzed;
-        document.getElementById('stats').style.display = 'block';
+        document.getElementById("stats").style.display = "block";
       }
     }
   });
@@ -70,15 +70,15 @@ async function init() {
 
   // Listen for detection updates from background
   chrome.runtime.onMessage.addListener((message) => {
-    console.log('[Popup] Received runtime message:', message.action);
-    
+    console.log("[Popup] Received runtime message:", message.action);
+
     if (message.action === "detectionUpdate") {
       // Update stats with new state
       if (message.state) {
         sessionData.handsAnalyzed = message.state.handsAnalyzed || 0;
         updateStats(message.state);
       }
-      
+
       // Update last detection display
       if (message.detection) {
         updateLastDetection(message.detection);
@@ -105,26 +105,29 @@ function isPokerSite(url) {
 }
 
 async function startAnalysis() {
-  console.log('[Popup] Starting analysis...');
-  
+  console.log("[Popup] Starting analysis...");
+
   // First, inject content script if needed
   try {
     await chrome.scripting.executeScript({
       target: { tabId: currentTab.id },
       files: ["content.js"],
     });
-    console.log('[Popup] Content script injected');
+    console.log("[Popup] Content script injected");
   } catch (e) {
-    console.log('[Popup] Content script already injected');
+    console.log("[Popup] Content script already injected");
   }
 
   // Send start message through background
-  chrome.runtime.sendMessage({
-    action: "startAnalyzer",
-    tab: currentTab
-  }, (response) => {
-    console.log('[Popup] Start response:', response);
-  });
+  chrome.runtime.sendMessage(
+    {
+      action: "startAnalyzer",
+      tab: currentTab,
+    },
+    (response) => {
+      console.log("[Popup] Start response:", response);
+    },
+  );
 
   // Also send start message directly to content script
   chrome.tabs.sendMessage(
@@ -134,7 +137,7 @@ async function startAnalysis() {
       interval: parseInt(intervalSlider.value),
     },
     (response) => {
-      console.log('[Popup] Content script start response:', response);
+      console.log("[Popup] Content script start response:", response);
       if (response && response.status === "started") {
         setRunningState(true);
       }
@@ -143,16 +146,16 @@ async function startAnalysis() {
 }
 
 function stopAnalysis() {
-  console.log('[Popup] Stopping analysis...');
-  
+  console.log("[Popup] Stopping analysis...");
+
   // Send stop message through background
   chrome.runtime.sendMessage({
-    action: "stopAnalyzer"
+    action: "stopAnalyzer",
   });
-  
+
   // Also send stop message directly to content script
   chrome.tabs.sendMessage(currentTab.id, { action: "stop" }, (response) => {
-    console.log('[Popup] Content script stop response:', response);
+    console.log("[Popup] Content script stop response:", response);
     if (response && response.status === "stopped") {
       setRunningState(false);
     }
@@ -177,31 +180,32 @@ function setRunningState(running) {
 }
 
 function updateStats(state) {
-  console.log('[Popup] Updating stats:', state);
-  
+  console.log("[Popup] Updating stats:", state);
+
   // Update hands analyzed count
   if (state.handsAnalyzed !== undefined) {
     handsCount.textContent = state.handsAnalyzed;
   }
-  
+
   // Calculate session duration
   if (state.sessionStartTime) {
     const duration = Date.now() - state.sessionStartTime;
     const minutes = Math.floor(duration / 60000);
     const seconds = Math.floor((duration % 60000) / 1000);
-    
+
     // Update or create session duration display
-    let sessionDuration = document.getElementById('sessionDuration');
+    let sessionDuration = document.getElementById("sessionDuration");
     if (!sessionDuration) {
-      const row = document.createElement('div');
-      row.className = 'stat-row';
-      row.innerHTML = '<span>Session Time:</span><span id="sessionDuration">-</span>';
-      document.getElementById('stats').appendChild(row);
-      sessionDuration = document.getElementById('sessionDuration');
+      const row = document.createElement("div");
+      row.className = "stat-row";
+      row.innerHTML =
+        '<span>Session Time:</span><span id="sessionDuration">-</span>';
+      document.getElementById("stats").appendChild(row);
+      sessionDuration = document.getElementById("sessionDuration");
     }
     sessionDuration.textContent = `${minutes}m ${seconds}s`;
   }
-  
+
   // Calculate detection rate from recent detections
   if (state.detections) {
     const recentDetections = state.detections.slice(-20);
@@ -217,15 +221,16 @@ function updateStats(state) {
 }
 
 function updateLastDetection(detection) {
-  console.log('[Popup] Updating last detection:', detection);
-  
+  console.log("[Popup] Updating last detection:", detection);
+
   if (!detection) return;
-  
+
   // Show last detection section even if no cards yet
   lastDetection.style.display = "block";
-  
+
   if (detection.cards.length === 0 && detection.communityCards.length === 0) {
-    detectedCards.innerHTML = '<div style="color: #888; font-size: 12px;">Waiting for cards...</div>';
+    detectedCards.innerHTML =
+      '<div style="color: #888; font-size: 12px;">Waiting for cards...</div>';
     return;
   }
 
@@ -233,19 +238,21 @@ function updateLastDetection(detection) {
 
   // Display hole cards
   if (detection.cards.length > 0) {
-    const holeCardsDiv = document.createElement('div');
-    holeCardsDiv.innerHTML = '<div style="font-size: 12px; margin-bottom: 5px;">Hole Cards:</div>';
+    const holeCardsDiv = document.createElement("div");
+    holeCardsDiv.innerHTML =
+      '<div style="font-size: 12px; margin-bottom: 5px;">Hole Cards:</div>';
     detection.cards.forEach((card) => {
       const cardEl = createCardElement(card);
       holeCardsDiv.appendChild(cardEl);
     });
     detectedCards.appendChild(holeCardsDiv);
   }
-  
+
   // Display community cards if any
   if (detection.communityCards && detection.communityCards.length > 0) {
-    const communityDiv = document.createElement('div');
-    communityDiv.innerHTML = '<div style="font-size: 12px; margin: 10px 0 5px 0;">Community:</div>';
+    const communityDiv = document.createElement("div");
+    communityDiv.innerHTML =
+      '<div style="font-size: 12px; margin: 10px 0 5px 0;">Community:</div>';
     detection.communityCards.forEach((card) => {
       const cardEl = createCardElement(card);
       communityDiv.appendChild(cardEl);

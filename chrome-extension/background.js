@@ -13,10 +13,10 @@ let analyzerState = {
 };
 
 // Load persisted state
-chrome.storage.local.get(['analyzerState'], (result) => {
+chrome.storage.local.get(["analyzerState"], (result) => {
   if (result.analyzerState) {
     analyzerState = { ...analyzerState, ...result.analyzerState };
-    console.log('[Background] Loaded persisted state:', analyzerState);
+    console.log("[Background] Loaded persisted state:", analyzerState);
   }
 });
 
@@ -35,8 +35,8 @@ chrome.action.onClicked.addListener((tab) => {
 
 // Handle messages from content scripts and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('[Background] Received message:', request.action);
-  
+  console.log("[Background] Received message:", request.action);
+
   switch (request.action) {
     case "analyze":
       handleDetection(request.detection, sender.tab);
@@ -45,17 +45,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     case "captureVisibleTab":
       // Capture the visible tab and send back as data URL
-      chrome.tabs.captureVisibleTab(sender.tab.windowId, {
-        format: "png"
-      }, (dataUrl) => {
-        if (chrome.runtime.lastError) {
-          console.error('[Background] Screenshot failed:', chrome.runtime.lastError);
-          sendResponse({ error: chrome.runtime.lastError.message });
-        } else {
-          console.log('[Background] Screenshot captured successfully');
-          sendResponse({ imageData: dataUrl });
-        }
-      });
+      chrome.tabs.captureVisibleTab(
+        sender.tab.windowId,
+        {
+          format: "png",
+        },
+        (dataUrl) => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              "[Background] Screenshot failed:",
+              chrome.runtime.lastError,
+            );
+            sendResponse({ error: chrome.runtime.lastError.message });
+          } else {
+            console.log("[Background] Screenshot captured successfully");
+            sendResponse({ imageData: dataUrl });
+          }
+        },
+      );
       return true; // Will respond asynchronously
 
     case "getState":
@@ -77,8 +84,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Removed - handled inline above
 
 function handleDetection(detection, tab) {
-  console.log('[Background] Handling detection:', detection);
-  
+  console.log("[Background] Handling detection:", detection);
+
   // Update state
   analyzerState.currentTab = tab.id;
   analyzerState.detections.push({
@@ -101,13 +108,15 @@ function handleDetection(detection, tab) {
   chrome.storage.local.set({ analyzerState });
 
   // Send update to popup if it's open
-  chrome.runtime.sendMessage({
-    action: "detectionUpdate",
-    detection: detection,
-    state: analyzerState
-  }).catch(() => {
-    // Popup not open, ignore error
-  });
+  chrome.runtime
+    .sendMessage({
+      action: "detectionUpdate",
+      detection: detection,
+      state: analyzerState,
+    })
+    .catch(() => {
+      // Popup not open, ignore error
+    });
 
   // Analyze hand with solver
   if (detection.cards.length >= 2) {
@@ -153,7 +162,7 @@ function getBasicRecommendation(detection) {
 function startAnalyzer(tab) {
   analyzerState.isRunning = true;
   analyzerState.currentTab = tab.id;
-  
+
   // Reset session if starting fresh
   if (!analyzerState.sessionStartTime) {
     analyzerState.sessionStartTime = Date.now();
@@ -165,8 +174,8 @@ function startAnalyzer(tab) {
 
   // Send start message to content script
   chrome.tabs.sendMessage(tab.id, { action: "start" });
-  
-  console.log('[Background] Started analyzer for tab:', tab.id);
+
+  console.log("[Background] Started analyzer for tab:", tab.id);
 }
 
 function stopAnalyzer() {
@@ -179,8 +188,8 @@ function stopAnalyzer() {
   if (analyzerState.currentTab) {
     chrome.tabs.sendMessage(analyzerState.currentTab, { action: "stop" });
   }
-  
-  console.log('[Background] Stopped analyzer');
+
+  console.log("[Background] Stopped analyzer");
 }
 
 // Optional: Connect to native solver

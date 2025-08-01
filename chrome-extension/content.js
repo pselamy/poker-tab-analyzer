@@ -13,7 +13,19 @@ class PokerAnalyzer {
 
     // Card detection patterns
     this.ranks = [
-      "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "T",
+      "J",
+      "Q",
+      "K",
+      "A",
     ];
     this.suits = ["c", "d", "h", "s"];
 
@@ -24,7 +36,7 @@ class PokerAnalyzer {
     // Listen for messages from popup/background
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log("[PokerAnalyzer] Received message:", request.action);
-      
+
       if (request.action === "start") {
         this.start();
         sendResponse({ status: "started" });
@@ -57,13 +69,17 @@ class PokerAnalyzer {
 
     this.isRunning = true;
     this.consecutiveFailures = 0;
-    console.log("[PokerAnalyzer] Starting analysis with interval:", this.captureInterval, "ms");
+    console.log(
+      "[PokerAnalyzer] Starting analysis with interval:",
+      this.captureInterval,
+      "ms",
+    );
 
     // Start capture loop
     this.intervalId = setInterval(() => {
       this.captureAndAnalyze();
     }, this.captureInterval);
-    
+
     // Initial capture
     this.captureAndAnalyze();
   }
@@ -86,33 +102,39 @@ class PokerAnalyzer {
     // Request screenshot from background script
     chrome.runtime.sendMessage(
       {
-        action: "captureVisibleTab"
+        action: "captureVisibleTab",
       },
       (response) => {
         if (chrome.runtime.lastError) {
-          console.error("[PokerAnalyzer] Runtime error:", chrome.runtime.lastError);
+          console.error(
+            "[PokerAnalyzer] Runtime error:",
+            chrome.runtime.lastError,
+          );
           this.handleCaptureFailure();
           return;
         }
-        
+
         if (!response || response.error) {
-          console.error("[PokerAnalyzer] Screenshot failed:", response?.error || "No response");
+          console.error(
+            "[PokerAnalyzer] Screenshot failed:",
+            response?.error || "No response",
+          );
           this.handleCaptureFailure();
           return;
         }
-        
+
         if (!response.imageData) {
           console.error("[PokerAnalyzer] No image data in response");
           this.handleCaptureFailure();
           return;
         }
-        
+
         console.log("[PokerAnalyzer] Screenshot received, processing...");
         this.consecutiveFailures = 0;
-        
+
         // Convert dataURL to ImageData and analyze
         this.processScreenshot(response.imageData, startTime);
-      }
+      },
     );
   }
 
@@ -126,32 +148,32 @@ class PokerAnalyzer {
 
   processScreenshot(dataURL, startTime) {
     const img = new Image();
-    
+
     img.onload = () => {
       console.log(`[PokerAnalyzer] Image loaded: ${img.width}x${img.height}`);
-      
+
       // Create canvas and draw image
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = img.width;
       canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0);
-      
+
       // Get ImageData
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      
+
       // Analyze the image
       const detection = this.analyzePokerTable(imageData);
-      
+
       if (detection.cards.length > 0 || detection.communityCards.length > 0) {
         console.log("[PokerAnalyzer] Cards detected!", {
           holeCards: detection.cards,
           communityCards: detection.communityCards,
-          pot: detection.pot
+          pot: detection.pot,
         });
-        
+
         this.lastDetection = detection;
-        
+
         // Send to background for solver analysis
         chrome.runtime.sendMessage({
           action: "analyze",
@@ -159,15 +181,17 @@ class PokerAnalyzer {
           site: window.location.hostname,
         });
       }
-      
+
       const elapsed = performance.now() - startTime;
-      console.log(`[PokerAnalyzer] Analysis completed in ${elapsed.toFixed(1)}ms`);
+      console.log(
+        `[PokerAnalyzer] Analysis completed in ${elapsed.toFixed(1)}ms`,
+      );
     };
-    
+
     img.onerror = (err) => {
       console.error("[PokerAnalyzer] Failed to load screenshot image:", err);
     };
-    
+
     img.src = dataURL;
   }
 
@@ -179,12 +203,16 @@ class PokerAnalyzer {
       timestamp: Date.now(),
     };
 
-    console.log(`[PokerAnalyzer] Analyzing image ${imageData.width}x${imageData.height}`);
+    console.log(
+      `[PokerAnalyzer] Analyzing image ${imageData.width}x${imageData.height}`,
+    );
 
     // Look for poker table region (green felt area)
     const tableRegion = this.findTableRegion(imageData);
     if (tableRegion) {
-      console.log(`[PokerAnalyzer] Found table region at ${tableRegion.x},${tableRegion.y} size ${tableRegion.width}x${tableRegion.height}`);
+      console.log(
+        `[PokerAnalyzer] Found table region at ${tableRegion.x},${tableRegion.y} size ${tableRegion.width}x${tableRegion.height}`,
+      );
     }
 
     // Quick card detection using pattern matching
@@ -196,7 +224,7 @@ class PokerAnalyzer {
       // Hole cards are typically at the bottom of the screen
       if (card.y > imageData.height * 0.6) {
         detection.cards.push(card);
-      } 
+      }
       // Community cards are in the middle of the table
       else if (
         card.y > imageData.height * 0.3 &&
@@ -215,9 +243,11 @@ class PokerAnalyzer {
   findTableRegion(imageData) {
     const { data, width, height } = imageData;
     let greenPixelCount = 0;
-    let minX = width, maxX = 0;
-    let minY = height, maxY = 0;
-    
+    let minX = width,
+      maxX = 0;
+    let minY = height,
+      maxY = 0;
+
     // Look for green felt color (poker tables are typically green)
     for (let y = 0; y < height; y += 10) {
       for (let x = 0; x < width; x += 10) {
@@ -225,7 +255,7 @@ class PokerAnalyzer {
         const r = data[idx];
         const g = data[idx + 1];
         const b = data[idx + 2];
-        
+
         // Check for green-ish colors (g > r and g > b)
         if (g > r + 20 && g > b + 20 && g > 50 && g < 150) {
           greenPixelCount++;
@@ -236,17 +266,17 @@ class PokerAnalyzer {
         }
       }
     }
-    
+
     // If we found a significant green region, return it
     if (greenPixelCount > 100) {
       return {
         x: minX,
         y: minY,
         width: maxX - minX,
-        height: maxY - minY
+        height: maxY - minY,
       };
     }
-    
+
     return null;
   }
 
@@ -306,8 +336,10 @@ class PokerAnalyzer {
 
   floodFillRegion(data, width, height, startX, startY, visited) {
     const queue = [{ x: startX, y: startY }];
-    let minX = startX, maxX = startX;
-    let minY = startY, maxY = startY;
+    let minX = startX,
+      maxX = startX;
+    let minY = startY,
+      maxY = startY;
     let pixelCount = 0;
 
     while (queue.length > 0) {
@@ -576,13 +608,21 @@ if (
 ) {
   setTimeout(() => {
     console.log("[PokerAnalyzer] Auto-starting on poker site...");
-    
+
     // Log page structure for debugging
     console.log("[PokerAnalyzer] Page structure:");
-    console.log("- Body dimensions:", document.body.offsetWidth, "x", document.body.offsetHeight);
-    console.log("- Canvas elements:", document.querySelectorAll('canvas').length);
-    console.log("- iFrames:", document.querySelectorAll('iframe').length);
-    
+    console.log(
+      "- Body dimensions:",
+      document.body.offsetWidth,
+      "x",
+      document.body.offsetHeight,
+    );
+    console.log(
+      "- Canvas elements:",
+      document.querySelectorAll("canvas").length,
+    );
+    console.log("- iFrames:", document.querySelectorAll("iframe").length);
+
     analyzer.start();
   }, 2000);
 }
