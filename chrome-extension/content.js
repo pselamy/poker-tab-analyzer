@@ -1,16 +1,15 @@
 /**
  * Content script that runs on poker sites
- * Captures and analyzes poker table in real-time
+ * Captures and analyzes poker table using screenshot approach
  */
 
 class PokerAnalyzer {
   constructor() {
     this.isRunning = false;
-    this.captureInterval = 250; // milliseconds
+    this.captureInterval = 500; // milliseconds - slower for screenshot approach
     this.intervalId = null;
     this.lastDetection = null;
-    this.canvas = null;
-    this.ctx = null;
+    this.consecutiveFailures = 0;
 
     // Card detection patterns
     this.ranks = [
@@ -34,12 +33,10 @@ class PokerAnalyzer {
   }
 
   init() {
-    // Create offscreen canvas for image processing
-    this.canvas = document.createElement("canvas");
-    this.ctx = this.canvas.getContext("2d");
-
     // Listen for messages from popup/background
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      console.log("[PokerAnalyzer] Received message:", request.action);
+
       if (request.action === "start") {
         this.start();
         sendResponse({ status: "started" });
@@ -51,22 +48,40 @@ class PokerAnalyzer {
           isRunning: this.isRunning,
           lastDetection: this.lastDetection,
         });
+      } else if (request.action === "updateInterval") {
+        this.captureInterval = request.interval;
+        if (this.isRunning) {
+          this.stop();
+          this.start();
+        }
       }
     });
 
-    console.log("Poker Analyzer initialized on", window.location.hostname);
+    console.log("[PokerAnalyzer] Initialized on", window.location.hostname);
+    console.log("[PokerAnalyzer] Page URL:", window.location.href);
   }
 
   start() {
-    if (this.isRunning) return;
+    if (this.isRunning) {
+      console.log("[PokerAnalyzer] Already running");
+      return;
+    }
 
     this.isRunning = true;
-    console.log("Starting poker analysis...");
+    this.consecutiveFailures = 0;
+    console.log(
+      "[PokerAnalyzer] Starting analysis with interval:",
+      this.captureInterval,
+      "ms",
+    );
 
     // Start capture loop
     this.intervalId = setInterval(() => {
       this.captureAndAnalyze();
     }, this.captureInterval);
+
+    // Initial capture
+    this.captureAndAnalyze();
   }
 
   stop() {
@@ -77,138 +92,107 @@ class PokerAnalyzer {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
-    console.log("Stopped poker analysis");
+    console.log("[PokerAnalyzer] Stopped analysis");
   }
 
   captureAndAnalyze() {
     const startTime = performance.now();
+    console.log("[PokerAnalyzer] Requesting screenshot...");
 
-    // Find poker table element (varies by site)
-    const tableElement = this.findPokerTable();
-    if (!tableElement) {
-      console.warn("Poker table not found");
-      return;
-    }
-
-    // Capture table as image
-    this.captureElement(tableElement)
-      .then((imageData) => {
-        // Analyze the image
-        const detection = this.analyzePokerTable(imageData);
-
-        if (detection.cards.length > 0 || detection.communityCards.length > 0) {
-          this.lastDetection = detection;
-
-          // Send to background for solver analysis
-          chrome.runtime.sendMessage({
-            action: "analyze",
-            detection: detection,
-            site: window.location.hostname,
-          });
-
-          // Log performance
-          const elapsed = performance.now() - startTime;
-          if (elapsed > 100) {
-            console.warn(`Analysis took ${elapsed.toFixed(1)}ms`);
-          }
-        }
-      })
-      .catch((err) => {
-        console.error("Capture failed:", err);
-      });
-  }
-
-  findPokerTable() {
-    // Try different selectors for different sites
-    const selectors = [
-      // Global Poker
-      ".table-container",
-      ".poker-table",
-      "#table",
-      // PokerStars
-      ".table-wrapper",
-      ".gameContainer",
-      // GGPoker
-      ".game-table",
-      ".table-view",
-      // Generic
-      '[class*="table"]',
-      '[id*="table"]',
-      "canvas", // Some sites use canvas
-    ];
-
-    for (const selector of selectors) {
-      const element = document.querySelector(selector);
-      if (element && element.offsetWidth > 400) {
-        return element;
-      }
-    }
-
-    // Fallback: find largest element that looks like a table
-    const candidates = document.querySelectorAll("div, canvas");
-    let largest = null;
-    let largestArea = 0;
-
-    for (const el of candidates) {
-      const rect = el.getBoundingClientRect();
-      const area = rect.width * rect.height;
-
-      if (area > largestArea && rect.width > 600 && rect.height > 400) {
-        largest = el;
-        largestArea = area;
-      }
-    }
-
-    return largest;
-  }
-
-  async captureElement(element) {
-    // Get element bounds
-    const rect = element.getBoundingClientRect();
-
-    // Set canvas size
-    this.canvas.width = rect.width;
-    this.canvas.height = rect.height;
-
-    // Handle canvas elements
-    if (element.tagName === "CANVAS") {
-      this.ctx.drawImage(element, 0, 0);
-    } else {
-      // For DOM elements, we need to use a different approach
-      // Using html2canvas would be ideal, but for now we'll capture visible area
-      await this.captureVisibleArea(rect);
-    }
-
-    return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-  }
-
-  async captureVisibleArea(rect) {
     // Request screenshot from background script
-    return new Promise((resolve) => {
-      chrome.runtime.sendMessage(
-        {
-          action: "captureVisibleTab",
-          rect: {
-            x: rect.x,
-            y: rect.y,
-            width: rect.width,
-            height: rect.height,
-          },
-        },
-        (response) => {
-          if (response && response.imageData) {
-            const img = new Image();
-            img.onload = () => {
-              this.ctx.drawImage(img, 0, 0);
-              resolve();
-            };
-            img.src = response.imageData;
-          } else {
-            resolve();
-          }
-        },
+    chrome.runtime.sendMessage(
+      {
+        action: "captureVisibleTab",
+      },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          console.error(
+            "[PokerAnalyzer] Runtime error:",
+            chrome.runtime.lastError,
+          );
+          this.handleCaptureFailure();
+          return;
+        }
+
+        if (!response || response.error) {
+          console.error(
+            "[PokerAnalyzer] Screenshot failed:",
+            response?.error || "No response",
+          );
+          this.handleCaptureFailure();
+          return;
+        }
+
+        if (!response.imageData) {
+          console.error("[PokerAnalyzer] No image data in response");
+          this.handleCaptureFailure();
+          return;
+        }
+
+        console.log("[PokerAnalyzer] Screenshot received, processing...");
+        this.consecutiveFailures = 0;
+
+        // Convert dataURL to ImageData and analyze
+        this.processScreenshot(response.imageData, startTime);
+      },
+    );
+  }
+
+  handleCaptureFailure() {
+    this.consecutiveFailures++;
+    if (this.consecutiveFailures > 10) {
+      console.error("[PokerAnalyzer] Too many consecutive failures, stopping");
+      this.stop();
+    }
+  }
+
+  processScreenshot(dataURL, startTime) {
+    const img = new Image();
+
+    img.onload = () => {
+      console.log(`[PokerAnalyzer] Image loaded: ${img.width}x${img.height}`);
+
+      // Create canvas and draw image
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      // Get ImageData
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      // Analyze the image
+      const detection = this.analyzePokerTable(imageData);
+
+      if (detection.cards.length > 0 || detection.communityCards.length > 0) {
+        console.log("[PokerAnalyzer] Cards detected!", {
+          holeCards: detection.cards,
+          communityCards: detection.communityCards,
+          pot: detection.pot,
+        });
+
+        this.lastDetection = detection;
+
+        // Send to background for solver analysis
+        chrome.runtime.sendMessage({
+          action: "analyze",
+          detection: detection,
+          site: window.location.hostname,
+        });
+      }
+
+      const elapsed = performance.now() - startTime;
+      console.log(
+        `[PokerAnalyzer] Analysis completed in ${elapsed.toFixed(1)}ms`,
       );
-    });
+    };
+
+    img.onerror = (err) => {
+      console.error("[PokerAnalyzer] Failed to load screenshot image:", err);
+    };
+
+    img.src = dataURL;
   }
 
   analyzePokerTable(imageData) {
@@ -219,19 +203,33 @@ class PokerAnalyzer {
       timestamp: Date.now(),
     };
 
+    console.log(
+      `[PokerAnalyzer] Analyzing image ${imageData.width}x${imageData.height}`,
+    );
+
+    // Look for poker table region (green felt area)
+    const tableRegion = this.findTableRegion(imageData);
+    if (tableRegion) {
+      console.log(
+        `[PokerAnalyzer] Found table region at ${tableRegion.x},${tableRegion.y} size ${tableRegion.width}x${tableRegion.height}`,
+      );
+    }
+
     // Quick card detection using pattern matching
     const cards = this.detectCards(imageData);
+    console.log(`[PokerAnalyzer] Detected ${cards.length} potential cards`);
 
     // Separate hole cards from community cards based on position
     cards.forEach((card) => {
+      // Hole cards are typically at the bottom of the screen
       if (card.y > imageData.height * 0.6) {
-        // Likely hole cards (bottom of screen)
         detection.cards.push(card);
-      } else if (
+      }
+      // Community cards are in the middle of the table
+      else if (
         card.y > imageData.height * 0.3 &&
-        card.y < imageData.height * 0.5
+        card.y < imageData.height * 0.6
       ) {
-        // Likely community cards (center)
         detection.communityCards.push(card);
       }
     });
@@ -240,6 +238,46 @@ class PokerAnalyzer {
     detection.pot = this.detectPotSize(imageData);
 
     return detection;
+  }
+
+  findTableRegion(imageData) {
+    const { data, width, height } = imageData;
+    let greenPixelCount = 0;
+    let minX = width,
+      maxX = 0;
+    let minY = height,
+      maxY = 0;
+
+    // Look for green felt color (poker tables are typically green)
+    for (let y = 0; y < height; y += 10) {
+      for (let x = 0; x < width; x += 10) {
+        const idx = (y * width + x) * 4;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+
+        // Check for green-ish colors (g > r and g > b)
+        if (g > r + 20 && g > b + 20 && g > 50 && g < 150) {
+          greenPixelCount++;
+          minX = Math.min(minX, x);
+          maxX = Math.max(maxX, x);
+          minY = Math.min(minY, y);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+
+    // If we found a significant green region, return it
+    if (greenPixelCount > 100) {
+      return {
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY,
+      };
+    }
+
+    return null;
   }
 
   detectCards(imageData) {
@@ -292,6 +330,7 @@ class PokerAnalyzer {
       }
     }
 
+    console.log(`[PokerAnalyzer] Found ${regions.length} card-like regions`);
     return regions;
   }
 
@@ -568,7 +607,22 @@ if (
   window.location.hostname.includes("pokerstars")
 ) {
   setTimeout(() => {
-    console.log("Auto-starting poker analyzer...");
+    console.log("[PokerAnalyzer] Auto-starting on poker site...");
+
+    // Log page structure for debugging
+    console.log("[PokerAnalyzer] Page structure:");
+    console.log(
+      "- Body dimensions:",
+      document.body.offsetWidth,
+      "x",
+      document.body.offsetHeight,
+    );
+    console.log(
+      "- Canvas elements:",
+      document.querySelectorAll("canvas").length,
+    );
+    console.log("- iFrames:", document.querySelectorAll("iframe").length);
+
     analyzer.start();
   }, 2000);
 }
