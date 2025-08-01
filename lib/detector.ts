@@ -2,6 +2,9 @@
  * Generic poker table detector using computer vision
  */
 
+import { TemplateMatcher } from "./template-matcher.js";
+import { RobustCardDetector } from "./robust-card-detector.js";
+
 export interface Card {
   rank: string;
   suit: string;
@@ -28,10 +31,15 @@ export interface TableState {
 export class PokerDetector {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private templateMatcher: TemplateMatcher;
+  private robustDetector: RobustCardDetector;
+  private useRobustDetection: boolean = true;
 
   constructor() {
     this.canvas = document.createElement("canvas");
     this.ctx = this.canvas.getContext("2d")!;
+    this.templateMatcher = new TemplateMatcher();
+    this.robustDetector = new RobustCardDetector();
   }
 
   /**
@@ -193,31 +201,43 @@ export class PokerDetector {
       bounds.height,
     );
 
-    // TODO: Implement actual OCR/template matching
-    // For now, return mock data
-    const ranks = [
-      "A",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
-      "J",
-      "Q",
-      "K",
-    ];
-    const suits = ["♠", "♥", "♦", "♣"];
-
-    return {
-      rank: ranks[Math.floor(Math.random() * ranks.length)],
-      suit: suits[Math.floor(Math.random() * suits.length)],
-      confidence: 0.95,
-      bounds,
-    };
+    // Get the card region image data
+    const cardImageData = cardCtx.getImageData(0, 0, bounds.width, bounds.height);
+    
+    let match = null;
+    
+    // Try robust detection first
+    if (this.useRobustDetection) {
+      const robustMatch = this.robustDetector.detectCard(cardImageData, { 
+        x: 0, 
+        y: 0, 
+        width: bounds.width, 
+        height: bounds.height 
+      });
+      
+      if (robustMatch) {
+        return {
+          rank: robustMatch.rank,
+          suit: robustMatch.suit,
+          confidence: robustMatch.confidence,
+          bounds,
+        };
+      }
+    }
+    
+    // Fall back to template matching
+    match = this.templateMatcher.matchCard(cardImageData);
+    
+    if (match) {
+      return {
+        rank: match.rank,
+        suit: match.suit,
+        confidence: match.confidence,
+        bounds,
+      };
+    }
+    
+    return null;
   }
 
   /**
