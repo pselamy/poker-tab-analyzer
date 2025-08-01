@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Test Poker Images</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .poker-table {
+            width: 1200px;
+            height: 800px;
+            background: #1a5f3f;
+            position: relative;
+            margin: 0 auto;
+        }
+        .card {
+            width: 80px;
+            height: 110px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+        .red { color: #d32f2f; }
+        .black { color: #000; }
+        
+        /* Hole cards - bottom center */
+        .hole-card-1 { bottom: 100px; left: 520px; }
+        .hole-card-2 { bottom: 100px; left: 610px; }
+        
+        /* Community cards - center */
+        .community-card-1 { top: 350px; left: 400px; }
+        .community-card-2 { top: 350px; left: 490px; }
+        .community-card-3 { top: 350px; left: 580px; }
+        .community-card-4 { top: 350px; left: 670px; }
+        .community-card-5 { top: 350px; left: 760px; }
+        
+        .pot {
+            position: absolute;
+            top: 280px;
+            left: 550px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+        
+        .action-buttons {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
+        
+        .action-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 15px 30px;
+            background: #2196f3;
+            color: white;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .action-button.fold { background: #f44336; }
+        .action-button.call { background: #ff9800; }
+        .action-button.raise { background: #4caf50; }
+        
+        #canvas { display: none; }
+    </style>
+</head>
+<body>
+    <div id="scenario1" class="poker-table">
+        <h2 style="color: white; text-align: center; padding: 20px;">Scenario 1: Pocket Aces</h2>
+        
+        <!-- Hole cards -->
+        <div class="card hole-card-1">A<span class="black">♠</span></div>
+        <div class="card hole-card-2">A<span class="red">♥</span></div>
+        
+        <!-- No community cards yet (pre-flop) -->
+        
+        <div class="pot">POT: $250</div>
+        
+        <div class="action-buttons">
+            <div class="action-button fold">FOLD</div>
+            <div class="action-button call">CALL $50</div>
+            <div class="action-button raise">RAISE</div>
+        </div>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+    
+    <script>
+        // Function to save table as image
+        function saveTableAsImage(tableId, filename) {
+            const table = document.getElementById(tableId);
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 1200;
+            canvas.height = 800;
+            
+            // Use html2canvas library (include it) or manually draw
+            // For now, we'll create a simple representation
+            
+            // Draw green background
+            ctx.fillStyle = '#1a5f3f';
+            ctx.fillRect(0, 0, 1200, 800);
+            
+            // Draw cards
+            const cards = table.querySelectorAll('.card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const tableRect = table.getBoundingClientRect();
+                
+                const x = rect.left - tableRect.left;
+                const y = rect.top - tableRect.top;
+                
+                // Draw white card background
+                ctx.fillStyle = 'white';
+                ctx.fillRect(x, y, rect.width, rect.height);
+                
+                // Draw border
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, rect.width, rect.height);
+                
+                // Draw text
+                ctx.fillStyle = 'black';
+                ctx.font = 'bold 32px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(card.textContent, x + rect.width/2, y + rect.height/2);
+            });
+            
+            // Save as image
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+            });
+        }
+        
+        // Create multiple scenarios
+        const scenarios = [
+            {
+                id: 'scenario1',
+                hole: ['A♠', 'A♥'],
+                community: [],
+                pot: '$250',
+                description: 'Pocket Aces Pre-flop'
+            },
+            {
+                id: 'scenario2',
+                hole: ['K♥', 'Q♥'],
+                community: ['A♥', '10♥', 'J♥'],
+                pot: '$1250',
+                description: 'Royal Flush on Flop'
+            },
+            {
+                id: 'scenario3',
+                hole: ['7♣', '2♦'],
+                community: ['A♠', 'K♦', 'Q♣', 'J♥', '10♠'],
+                pot: '$500',
+                description: 'Weak Hand vs Broadway'
+            }
+        ];
+        
+        // Generate images after page loads
+        window.onload = () => {
+            // You would call saveTableAsImage for each scenario
+            // saveTableAsImage('scenario1', 'pocket-aces.png');
+        };
+    </script>
+</body>
+</html>

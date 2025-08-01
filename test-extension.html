@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Poker Extension</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #2a2a2a;
+            color: white;
+        }
+        .card {
+            display: inline-block;
+            width: 60px;
+            height: 80px;
+            background: white;
+            color: black;
+            border: 2px solid black;
+            border-radius: 5px;
+            margin: 5px;
+            text-align: center;
+            line-height: 80px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .red { color: red; }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #3a3a3a;
+            border-radius: 10px;
+        }
+        h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>Poker Extension Test Page</h1>
+    
+    <div class="section">
+        <h2>Your Hand</h2>
+        <div class="card">A<span class="red">♥</span></div>
+        <div class="card">K<span class="red">♥</span></div>
+    </div>
+    
+    <div class="section">
+        <h2>Community Cards</h2>
+        <div class="card">Q<span class="red">♥</span></div>
+        <div class="card">J<span class="red">♥</span></div>
+        <div class="card">10<span class="red">♥</span></div>
+        <div class="card">9♠</div>
+        <div class="card">8♣</div>
+    </div>
+    
+    <div class="section">
+        <h2>Pot: $500</h2>
+        <h2>Players: 4</h2>
+    </div>
+    
+    <p>Open the extension popup and click "Start Analysis" to test the poker analyzer.</p>
+</body>
+</html>

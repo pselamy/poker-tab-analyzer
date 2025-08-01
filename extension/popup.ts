@@ -29,15 +29,31 @@ class PopupController {
   }
 
   private async init() {
-    // Get current status
+    // Get current status from storage AND content script
     const [tab] = await chrome.tabs.query({
       active: true,
       currentWindow: true,
     });
+    
+    // First check storage for persistent state
+    const result = await chrome.storage.local.get(['isAnalyzing', 'startTime', 'handCount']);
+    if (result.isAnalyzing) {
+      this.startTime = result.startTime || Date.now();
+      this.handCount = result.handCount || 0;
+      this.handCountElement.textContent = this.handCount.toString();
+      this.setRunning(true);
+    }
+    
+    // Also check with content script to ensure it's actually running
     if (tab.id) {
       chrome.tabs.sendMessage(tab.id, { type: "GET_STATUS" }, (response) => {
-        if (response?.isRunning) {
-          this.setRunning(true);
+        if (chrome.runtime.lastError) {
+          // Content script not injected yet
+          console.log('Content script not ready');
+          return;
+        }
+        if (response?.isRunning !== this.isRunning) {
+          this.setRunning(response?.isRunning || false);
         }
       });
     }
@@ -72,6 +88,8 @@ class PopupController {
       // Stop analysis
       chrome.tabs.sendMessage(tab.id, { type: "STOP_ANALYSIS" });
       this.setRunning(false);
+      // Clear storage
+      chrome.storage.local.remove(['isAnalyzing', 'startTime', 'handCount']);
     } else {
       // Start analysis
       const interval = parseInt(this.intervalInput.value);
@@ -80,6 +98,13 @@ class PopupController {
         interval: interval,
       });
       this.setRunning(true);
+      // Save to storage
+      chrome.storage.local.set({
+        isAnalyzing: true,
+        startTime: Date.now(),
+        handCount: 0,
+        interval: interval
+      });
     }
   }
 
@@ -131,6 +156,9 @@ class PopupController {
     if (tableState.holeCards.length > 0) {
       this.handCount++;
       this.handCountElement.textContent = this.handCount.toString();
+      
+      // Update storage with new hand count
+      chrome.storage.local.set({ handCount: this.handCount });
 
       this.currentHandElement.style.display = "block";
 

@@ -2,8 +2,8 @@
  * Content script that runs on poker sites
  */
 
-import { PokerDetector } from "../lib/detector.js";
-import { PokerSolver } from "../lib/solver.js";
+import { PokerDetector } from "./lib/detector.js";
+import { PokerSolver } from "./lib/solver.js";
 
 class PokerAnalyzer {
   private detector: PokerDetector;
@@ -16,6 +16,18 @@ class PokerAnalyzer {
     this.detector = new PokerDetector();
     this.solver = new PokerSolver();
     this.setupMessageListener();
+    this.checkAndRestoreState();
+  }
+
+  /**
+   * Check storage and restore state if analysis was running
+   */
+  private async checkAndRestoreState() {
+    const result = await chrome.storage.local.get(['isAnalyzing', 'interval']);
+    if (result.isAnalyzing) {
+      // Restore analysis with saved interval
+      this.start(result.interval || 250);
+    }
   }
 
   /**

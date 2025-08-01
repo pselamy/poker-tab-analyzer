@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GlobalPoker DOM Selector Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      background: #2a2a2a;
+      border-radius: 8px;
+    }
+    pre {
+      background: #333;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .instruction {
+      background: #444;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>GlobalPoker DOM Selector Testing</h1>
+  
+  <div class="test-section">
+    <h2>Instructions</h2>
+    <div class="instruction">
+      <p>1. Open GlobalPoker.com and navigate to a poker table</p>
+      <p>2. Open the browser console (F12)</p>
+      <p>3. Copy and run each of these commands to find the correct selectors</p>
+      <p>4. Report back which selectors find the poker table element</p>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test Commands</h2>
+    
+    <h3>1. Check for Canvas Elements</h3>
+    <pre>
+// Find all canvas elements
+console.log('=== CANVAS ELEMENTS ===');
+document.querySelectorAll('canvas').forEach((el, i) => {
+  console.log(`Canvas ${i}:`, {
+    id: el.id,
+    className: el.className,
+    width: el.width,
+    height: el.height,
+    parent: el.parentElement?.className || el.parentElement?.id
+  });
+});
+    </pre>
+
+    <h3>2. Check for iFrames</h3>
+    <pre>
+// Find all iframes
+console.log('=== IFRAMES ===');
+document.querySelectorAll('iframe').forEach((el, i) => {
+  console.log(`iFrame ${i}:`, {
+    id: el.id,
+    className: el.className,
+    src: el.src,
+    width: el.offsetWidth,
+    height: el.offsetHeight
+  });
+});
+    </pre>
+
+    <h3>3. Check Common Game Container Patterns</h3>
+    <pre>
+// Find elements with 'game' in class or id
+console.log('=== GAME CONTAINERS ===');
+document.querySelectorAll('[class*="game"], [id*="game"]').forEach(el => {
+  if (el.offsetWidth > 400 && el.offsetHeight > 300) {
+    console.log(`${el.tagName}#${el.id || '(no-id)'}.${el.className}:`, {
+      width: el.offsetWidth,
+      height: el.offsetHeight,
+      children: el.children.length
+    });
+  }
+});
+    </pre>
+
+    <h3>4. Check Table Elements</h3>
+    <pre>
+// Find elements with 'table' in class or id
+console.log('=== TABLE ELEMENTS ===');
+document.querySelectorAll('[class*="table"], [id*="table"]').forEach(el => {
+  if (el.offsetWidth > 400 && el.offsetHeight > 300) {
+    console.log(`${el.tagName}#${el.id || '(no-id)'}.${el.className}:`, {
+      width: el.offsetWidth,
+      height: el.offsetHeight
+    });
+  }
+});
+    </pre>
+
+    <h3>5. Find Large Containers</h3>
+    <pre>
+// Find all large containers
+console.log('=== LARGE CONTAINERS ===');
+document.querySelectorAll('div, section, main, article').forEach(el => {
+  if (el.offsetWidth > 600 && el.offsetHeight > 400) {
+    console.log(`${el.tagName}.${el.className || '(no-class)'}:`, {
+      id: el.id,
+      width: el.offsetWidth,
+      height: el.offsetHeight,
+      bgColor: window.getComputedStyle(el).backgroundColor,
+      children: el.children.length
+    });
+  }
+});
+    </pre>
+
+    <h3>6. React/Angular Component Check</h3>
+    <pre>
+// Check for React/Angular components
+console.log('=== FRAMEWORK COMPONENTS ===');
+// React
+document.querySelectorAll('[data-reactroot], [data-react-root]').forEach(el => {
+  console.log('React root:', el);
+});
+// Angular
+document.querySelectorAll('[ng-app], [data-ng-app]').forEach(el => {
+  console.log('Angular app:', el);
+});
+    </pre>
+
+    <h3>7. Comprehensive Selector Test</h3>
+    <pre>
+// Test all potential selectors
+const selectors = [
+  '.game-view',
+  '.game-container', 
+  '.game-wrapper',
+  '.table-view',
+  '.table-container',
+  '.table-wrapper',
+  '.poker-table',
+  '.game-table',
+  '#game',
+  '#table',
+  '#game-view',
+  '#table-view',
+  '[data-game]',
+  '[data-table]',
+  '.gp-table', // GP might stand for GlobalPoker
+  '.gp-game',
+  '#gp-table',
+  '#gp-game'
+];
+
+console.log('=== TESTING SELECTORS ===');
+selectors.forEach(selector => {
+  const el = document.querySelector(selector);
+  if (el) {
+    console.log(`✓ Found: ${selector}`, {
+      width: el.offsetWidth,
+      height: el.offsetHeight,
+      tag: el.tagName
+    });
+  }
+});
+    </pre>
+  </div>
+
+  <div class="test-section">
+    <h2>Advanced Detection</h2>
+    <pre>
+// Find the poker table using multiple strategies
+function findPokerTable() {
+  console.log('=== ADVANCED POKER TABLE DETECTION ===');
+  
+  // Strategy 1: Look for green felt color
+  const allElements = document.querySelectorAll('*');
+  const greenElements = [];
+  
+  allElements.forEach(el => {
+    const style = window.getComputedStyle(el);
+    const bg = style.backgroundColor;
+    if (bg && bg.includes('rgb') && el.offsetWidth > 500) {
+      const match = bg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (match) {
+        const [_, r, g, b] = match;
+        // Check for green-ish colors (poker felt)
+        if (parseInt(g) > parseInt(r) && parseInt(g) > parseInt(b)) {
+          greenElements.push({
+            element: el,
+            selector: el.tagName + (el.id ? '#' + el.id : '') + (el.className ? '.' + el.className.split(' ').join('.') : ''),
+            color: bg,
+            size: `${el.offsetWidth}x${el.offsetHeight}`
+          });
+        }
+      }
+    }
+  });
+  
+  console.log('Green elements found:', greenElements);
+  
+  // Strategy 2: Look for elements containing card images
+  const imgElements = document.querySelectorAll('img[src*="card"], img[src*="deck"], img[alt*="card"]');
+  console.log('Card images found:', imgElements.length);
+  
+  // Strategy 3: Look for chip/bet elements
+  const chipElements = document.querySelectorAll('[class*="chip"], [class*="bet"], [class*="pot"]');
+  console.log('Chip/bet elements found:', chipElements.length);
+  
+  return greenElements;
+}
+
+findPokerTable();
+    </pre>
+  </div>
+</body>
+</html>
